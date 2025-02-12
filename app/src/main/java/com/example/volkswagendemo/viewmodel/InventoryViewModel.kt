@@ -1,16 +1,14 @@
 package com.example.volkswagendemo.viewmodel
 
 import android.app.Application
-import android.content.ContentValues.TAG
+import android.content.ContentValues
+import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.core.dataclass.TagDataInfo
-import com.zebra.rfid.api3.ACCESS_OPERATION_CODE
-import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
@@ -28,7 +26,6 @@ import com.zebra.rfid.api3.START_TRIGGER_TYPE
 import com.zebra.rfid.api3.STATUS_EVENT_TYPE
 import com.zebra.rfid.api3.STOP_TRIGGER_TYPE
 import com.zebra.rfid.api3.TagAccess
-import com.zebra.rfid.api3.TagData
 import com.zebra.rfid.api3.TriggerInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -36,16 +33,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.locks.ReentrantLock
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
-import kotlin.concurrent.withLock
 
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
     application: Application
 ) : ViewModel() {
 
+    val context = application.applicationContext
     private val _inventoryStatus = MutableStateFlow("Connecting")
     val inventoryStatus: StateFlow<String> = _inventoryStatus.asStateFlow()
 
@@ -53,7 +54,7 @@ class InventoryViewModel @Inject constructor(
     private val _tagsFlow = MutableStateFlow<List<TagDataInfo>>(emptyList())
     val tagsFlow: StateFlow<List<TagDataInfo>> = _tagsFlow.asStateFlow()
 
-    private val readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
+    private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
     private var readerDevice: ReaderDevice? = null
     private var reader: RFIDReader? = null
     private val eventHandler = EventHandler()
@@ -63,8 +64,40 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun updateInventoryStatus(status: String) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch {
             _inventoryStatus.value = status
+            Log.d("RFID_updateInventoryStatus", "Status: $status")
+        }
+    }
+
+    fun startInventory() {
+        if (_inventoryStatus.value != "Reading") {
+            try {
+                inventoryPerform()
+            } catch (e: Exception) {
+                Log.e("RFID_startInventory", "Error starting inventory: ${e.message}")
+                updateInventoryStatus("Error")
+            }
+        }
+    }
+
+    fun stopInventory() {
+        if (_inventoryStatus.value != "Stopped") {
+            try {
+                inventoryStop()
+            } catch (e: Exception) {
+                Log.e("RFID_stopInventory", "Error stopping inventory: ${e.message}")
+                updateInventoryStatus("Error")
+            }
+        }
+    }
+
+    fun finishInventory() {
+        try {
+            inventoryResume()
+        } catch (e: Exception) {
+            Log.e("RFID_finishInventory", "Error finishing inventory: ${e.message}")
+            updateInventoryStatus("Error")
         }
     }
 
@@ -118,7 +151,7 @@ class InventoryViewModel @Inject constructor(
         }
         reader.Config.apply {
             setTriggerMode(ENUM_TRIGGER_MODE.RFID_MODE, true)
-            setUniqueTagReport(false)
+            setUniqueTagReport(true)
             setLedBlinkEnable(true)
             startTrigger = triggerInfo.StartTrigger
             stopTrigger = triggerInfo.StopTrigger
@@ -131,35 +164,8 @@ class InventoryViewModel @Inject constructor(
             addEventsListener(eventHandler)
             setHandheldEvent(true)
             setTagReadEvent(true)
-            setAttachTagDataWithReadEvent(false)
+            setAttachTagDataWithReadEvent(true)
         }
-    }
-
-    fun readOp(tagId: String): String {
-
-        val tagAccess = TagAccess()
-        val readAccessParams = tagAccess.ReadAccessParams().apply {
-            accessPassword = 0
-            count = 9
-            memoryBank = MEMORY_BANK.MEMORY_BANK_USER
-            offset = 4
-        }
-
-        return runCatching {
-            val tagData = reader?.Actions?.TagAccess?.readWait(tagId, readAccessParams, null)
-
-            tagData?.takeIf {
-                it.opStatus == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS &&
-                        it.opCode == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ
-            }?.also {
-                Log.i("RFID_readOp", "Successful read operation")
-            }?.memoryBankData.orEmpty()
-        }.getOrElse {
-            handleException(it)
-            Log.e("RFID_readOp", "Error reading tag: ${it.message}")
-            ""
-        }
-
     }
 
     private fun handleException(exception: Throwable) {
@@ -176,7 +182,10 @@ class InventoryViewModel @Inject constructor(
         super.onCleared()
         reader?.let {
             try {
+                inventoryStop()
                 it.disconnect()
+                reader = null;
+                readers.Dispose();
                 Log.i("RFID_onCleared", "Reader disconnected")
             } catch (e: Exception) {
                 Log.e("RFID_onCleared", "Error disconnecting reader: ${e.message}")
@@ -188,77 +197,36 @@ class InventoryViewModel @Inject constructor(
 
         override fun eventReadNotify(e: RfidReadEvents?) {
             reader?.Actions?.getReadTags(100)?.forEach { tag ->
-                val hexTagID = tag.tagID
-                val asciiTagID = hexToAscii(hexTagID)
-                Log.d(TAG, "Tag ID (Hex): $hexTagID -> (ASCII): $asciiTagID")
-                val repuve = asciiTagID.take(8)
-                if (repuve.all { it.isDigit() } && _tagDataList.none { it.asciiTag == repuve }) {
-                    val userMemoryBank =
-                        hexToAscii(readOp(hexTagID).dropLast(2)) // Leer memoria del tag
-                    val tagDataInfo = TagDataInfo(hexTagID, repuve, userMemoryBank)
-                    Log.d(
-                        TAG,
-                        "Tag Data Info: ${tagDataInfo.hexTag} - ${tagDataInfo.asciiTag} - ${tagDataInfo.memoryData}"
-                    )
-                    _tagDataList.add(tagDataInfo) // Agregamos el nuevo tag a la lista
-                    _tagsFlow.value =
-                        _tagDataList.toMutableList().reversed() // Actualizamos el flujo con la nueva lista
+
+                if (_tagDataList.none { it.controlData == tag.memoryBankData }) {
+
+                    val rawMemoryData = tag.memoryBankData
+                    val repuve = hexToAscii(tag.tagID).take(8)
+                    val vin = hexToAscii(tag.memoryBankData).take(16)
+
+                    if (repuve.all { it.isDigit() }) {
+                        val tagDataInfo =
+                            TagDataInfo(
+                                repuve = repuve,
+                                vin = vin,
+                                controlData = rawMemoryData
+                            )
+                        Log.d(
+                            "RFID_eventReadNotify",
+                            "Tag Data Info: ${tagDataInfo.repuve} - ${tagDataInfo.vin}"
+                        )
+                        _tagDataList.add(tagDataInfo)
+                        _tagsFlow.value = _tagDataList.toList().distinctBy { it.repuve }.reversed()
+                    }
+
                 }
             }
         }
 
-        /*override fun eventReadNotify(e: RfidReadEvents?) {
-            reader?.Actions?.getReadTags(100)?.forEach { tag ->
-                val hexTagID = tag.tagID
-                val asciiTagID = hexToAscii(hexTagID)
-                val repuve = asciiTagID.take(8)
-
-                if (repuve.all { it.isDigit() } && _tagDataList.none { it.asciiTag == repuve }) {
-                    val rawMemoryData = readOp(hexTagID).dropLast(2)
-                    val userMemoryBank = hexToAscii(rawMemoryData)
-
-                    if (userMemoryBank.isNotBlank()) {
-                        val tagDataInfo = TagDataInfo(hexTagID, repuve, userMemoryBank)
-                        Log.d(
-                            "RFID_eventReadNotify",
-                            "Tag Data Info: ${tagDataInfo.hexTag} - ${tagDataInfo.asciiTag} - ${tagDataInfo.memoryData}"
-                        )
-
-                        _tagDataList.add(tagDataInfo)
-                        _tagsFlow.value = _tagDataList.toMutableList().reversed()
-                    }
-                }
-            }
-        }*/
-
-        /*override fun eventStatusNotify(rfidStatusEvents: RfidStatusEvents?) {
-            rfidStatusEvents?.let { events ->
-                when (events.StatusEventData.statusEventType) {
-                    STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT -> {
-                        when (events.StatusEventData.HandheldTriggerEventData.handheldEvent) {
-                            HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED -> {
-                                inventoryStatus = "Reading"
-                                reader?.Actions?.Inventory?.perform()
-                            }
-
-                            HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED -> {
-                                inventoryStatus = "Stopped"
-                                reader?.Actions?.Inventory?.stop()
-                            }
-
-                            else -> {}
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-        }*/
-
         override fun eventStatusNotify(rfidStatusEvents: RfidStatusEvents?) {
             rfidStatusEvents?.let { events ->
                 val statusEventType = events.StatusEventData.statusEventType
-                Log.d(TAG, "Status Notification: $statusEventType")
+                Log.d("RFID_eventStatusNotify", "Status Notification: $statusEventType")
 
                 if (statusEventType == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT) {
 
@@ -268,24 +236,28 @@ class InventoryViewModel @Inject constructor(
                     when (handheldEvent) {
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED -> {
                             try {
-                                updateInventoryStatus("Reading")
-                                reader?.Actions?.Inventory?.perform()
+                                inventoryPerform()
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error performing inventory: ${e.message}")
+                                Log.e(
+                                    "RFID_eventStatusNotify",
+                                    "Error performing inventory: ${e.message}"
+                                )
                             }
                         }
 
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED -> {
                             try {
-                                updateInventoryStatus("Stopped")
-                                reader?.Actions?.Inventory?.stop()
+                                inventoryStop()
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error stopping inventory: ${e.message}")
+                                Log.e(
+                                    "RFID_eventStatusNotify",
+                                    "Error stopping inventory: ${e.message}"
+                                )
                             }
                         }
 
                         else -> {
-                            Log.d(TAG, handheldEvent.toString())
+                            Log.d("RFID_eventStatusNotify", handheldEvent.toString())
                         }
                     }
                 }
@@ -294,8 +266,86 @@ class InventoryViewModel @Inject constructor(
 
     }
 
+    private fun inventoryPerform() {
+
+        val tagAccess = TagAccess()
+
+        // 128 BITS 32 CHARS - 256 BITS 64 CHARS
+        val readAccessParams = tagAccess.ReadAccessParams().apply {
+            accessPassword = 0
+            count = 8 //8 NIBBLES 32 CHARS - 9 NIBBLES 36 CHARS
+            memoryBank = MEMORY_BANK.MEMORY_BANK_USER
+            offset = 0 //0 NIBBLES - 4 NIBBLES 16 CHARS
+        }
+
+        updateInventoryStatus("Reading")
+        reader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
+
+    }
+
+    private fun inventoryStop() {
+        updateInventoryStatus("Stopped")
+        reader?.Actions?.Inventory?.stop()
+    }
+
+    private fun inventoryResume() {
+        createExcelFile(context, tagsFlow.value)
+        updateInventoryStatus("Resume")
+        reader?.Actions?.Inventory?.stop()
+    }
+
     private fun hexToAscii(hex: String): String {
         return hex.chunked(2).mapNotNull { it.toIntOrNull(16)?.toChar() }.joinToString("")
     }
+
+    private fun createExcelFile(context: Context, tagsFlow: List<TagDataInfo>) {
+        val workshop = "taller123"
+        val timestamp = getActualDate()
+        val fileName = "$workshop $timestamp.xls"
+
+        val workbook = HSSFWorkbook()
+        val sheet = workbook.createSheet("Hoja de datos")
+
+        var row = sheet.createRow(1)
+        row.createCell(0).setCellValue("Localization")
+
+        row = sheet.createRow(2)
+        row.createCell(0).setCellValue(timestamp)
+
+        row = sheet.createRow(3)
+        row.createCell(0).setCellValue("Chasises")
+
+        tagsFlow.forEachIndexed { index, tag ->
+            row = sheet.createRow(index + 4)
+            row.createCell(0).setCellValue(tag.vin)
+        }
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, "application/vnd.ms-excel")
+            put(MediaStore.Downloads.RELATIVE_PATH, "Download/Catalogos/${workshop}")
+        }
+
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+        uri?.let {
+            try {
+                resolver.openOutputStream(it)?.use { fos ->
+                    workbook.write(fos)
+                }
+                Log.d("Excel", "📁 Archivo guardado en: $fileName")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("Excel", "⚠️ Error al guardar el archivo: ${e.message}")
+            } finally {
+                workbook.close()
+            }
+        }
+
+    }
+
+    private fun getActualDate(): String =
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
 }

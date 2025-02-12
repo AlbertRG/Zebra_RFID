@@ -19,9 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.core.dataclass.TagDataInfo
+import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
 fun InventoryStopped(
+    inventoryViewModel: InventoryViewModel,
     tags: List<TagDataInfo> = emptyList()
 ) {
     Column(
@@ -56,23 +58,24 @@ fun InventoryStopped(
         ) {
             items(tags) { tag ->
                 InventoryCard(
-                    repuve = tag.asciiTag,
-                    vin = tag.memoryData
+                    repuve = tag.repuve,
+                    vin = tag.vin
                 )
             }
         }
         InventoryBottomBar(
             isDualMode = true,
             title = "Reanudar",
-            onClickListener = {},
+            onClickListener = {inventoryViewModel.startInventory()},
             title2 = "Finalizar",
-            onClickListener2 = {}
+            onClickListener2 = {inventoryViewModel.finishInventory()}
         )
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun InventoryStoppedPreview() {
     InventoryStopped()
-}
+}*/

@@ -22,9 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
-fun InventoryReady() {
+fun InventoryReady(inventoryViewModel: InventoryViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,15 +73,16 @@ fun InventoryReady() {
         InventoryBottomBar(
             isDualMode = false,
             title = "Comenzar",
-            onClickListener = {},
+            onClickListener = {inventoryViewModel.startInventory()},
             title2 = "",
             onClickListener2 = {}
         )
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun InventoryReadyPreview() {
     InventoryReady()
-}
+}*/

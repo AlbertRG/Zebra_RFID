@@ -103,9 +103,9 @@ fun InventoryScreen(
             ) {
                 when (rfidStatus) {
                     "Connecting" -> InventoryConnecting()
-                    "Ready" -> InventoryReady()
-                    "Reading" -> InventoryReading(tags)
-                    "Stopped" -> InventoryStopped(tags)
+                    "Ready" -> InventoryReady(inventoryViewModel)
+                    "Reading" -> InventoryReading(inventoryViewModel, tags)
+                    "Stopped" -> InventoryStopped(inventoryViewModel, tags)
                     "Resume" -> InventoryResume()
                     "Error" -> InventoryError()
                 }

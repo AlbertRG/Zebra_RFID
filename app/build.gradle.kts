@@ -81,6 +81,9 @@ dependencies {
 
     // Location Services
     implementation(libs.play.services.location)
+
+    // XLS
+    implementation(libs.poi)
     
     // Legacy Support
     implementation(libs.legacy.support.v4)
