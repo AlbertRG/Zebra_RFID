@@ -16,16 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
-fun InventoryError() {
+fun InventoryError(
+    inventoryViewModel: InventoryViewModel
+) {
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
 
@@ -67,15 +69,9 @@ fun InventoryError() {
         InventoryBottomBar(
             isDualMode = false,
             title = "Reintentar",
-            onClickListener = {},
+            onClickListener = { inventoryViewModel.retryConnection() },
             title2 = "",
             onClickListener2 = {}
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun InventoryErrorPreview() {
-    InventoryError()
 }

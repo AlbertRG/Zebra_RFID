@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
@@ -60,7 +59,7 @@ fun InventoryReady(inventoryViewModel: InventoryViewModel) {
             fontSize = 14.sp,
         )
         Text(
-            text = "buscar REPUVES disponibles",
+            text = "buscar VINs disponibles",
             color = Color.Gray,
             fontSize = 14.sp,
         )
@@ -73,16 +72,9 @@ fun InventoryReady(inventoryViewModel: InventoryViewModel) {
         InventoryBottomBar(
             isDualMode = false,
             title = "Comenzar",
-            onClickListener = {inventoryViewModel.startInventory()},
+            onClickListener = { inventoryViewModel.startInventory() },
             title2 = "",
             onClickListener2 = {}
         )
     }
 }
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun InventoryReadyPreview() {
-    InventoryReady()
-}*/

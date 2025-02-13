@@ -39,6 +39,7 @@ fun InventoryScreen(
 
     val rfidStatus by inventoryViewModel.inventoryStatus.collectAsState()
     val tags by inventoryViewModel.tagsFlow.collectAsState()
+    val files by inventoryViewModel.filesFlow.collectAsState()
 
     Scaffold(
         topBar = {
@@ -106,8 +107,8 @@ fun InventoryScreen(
                     "Ready" -> InventoryReady(inventoryViewModel)
                     "Reading" -> InventoryReading(inventoryViewModel, tags)
                     "Stopped" -> InventoryStopped(inventoryViewModel, tags)
-                    "Resume" -> InventoryResume()
-                    "Error" -> InventoryError()
+                    "Resume" -> InventoryResume(inventoryViewModel, files)
+                    "Error" -> InventoryError(inventoryViewModel)
                 }
             }
         }

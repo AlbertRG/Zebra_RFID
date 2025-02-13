@@ -3,7 +3,6 @@ package com.example.volkswagendemo.viewmodel
 import android.app.Application
 import android.content.ContentValues
 import android.content.Context
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -29,13 +28,12 @@ import com.zebra.rfid.api3.TagAccess
 import com.zebra.rfid.api3.TriggerInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,6 +52,9 @@ class InventoryViewModel @Inject constructor(
     private val _tagsFlow = MutableStateFlow<List<TagDataInfo>>(emptyList())
     val tagsFlow: StateFlow<List<TagDataInfo>> = _tagsFlow.asStateFlow()
 
+    private val _filesFlow = MutableStateFlow<List<String>>(emptyList())
+    val filesFlow: StateFlow<List<String>> = _filesFlow.asStateFlow()
+
     private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
     private var readerDevice: ReaderDevice? = null
     private var reader: RFIDReader? = null
@@ -61,13 +62,6 @@ class InventoryViewModel @Inject constructor(
 
     init {
         connectReader()
-    }
-
-    private fun updateInventoryStatus(status: String) {
-        viewModelScope.launch {
-            _inventoryStatus.value = status
-            Log.d("RFID_updateInventoryStatus", "Status: $status")
-        }
     }
 
     fun startInventory() {
@@ -81,6 +75,23 @@ class InventoryViewModel @Inject constructor(
         }
     }
 
+    private fun inventoryPerform() {
+
+        val tagAccess = TagAccess()
+
+        // 128 BITS 32 CHARS - 256 BITS 64 CHARS
+        val readAccessParams = tagAccess.ReadAccessParams().apply {
+            accessPassword = 0
+            count = 8 //8 NIBBLES 32 CHARS - 9 NIBBLES 36 CHARS
+            memoryBank = MEMORY_BANK.MEMORY_BANK_USER
+            offset = 0 //0 NIBBLES - 4 NIBBLES 16 CHARS
+        }
+
+        updateInventoryStatus("Reading")
+        reader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
+
+    }
+
     fun stopInventory() {
         if (_inventoryStatus.value != "Stopped") {
             try {
@@ -92,33 +103,93 @@ class InventoryViewModel @Inject constructor(
         }
     }
 
+    private fun inventoryStop() {
+        reader?.Actions?.TagAccess?.stopAccess()
+        updateInventoryStatus("Stopped")
+    }
+
     fun finishInventory() {
-        try {
-            inventoryResume()
-        } catch (e: Exception) {
-            Log.e("RFID_finishInventory", "Error finishing inventory: ${e.message}")
-            updateInventoryStatus("Error")
+        if (_inventoryStatus.value != "Resume") {
+            try {
+                inventoryResume()
+            } catch (e: Exception) {
+                Log.e("RFID_finishInventory", "Error finishing inventory: ${e.message}")
+                updateInventoryStatus("Error")
+            }
+        }
+    }
+
+    private fun inventoryResume() {
+        createExcelFile(context, tagsFlow.value, "taller123")
+        listExcelFiles(context, "taller123")
+        updateInventoryStatus("Resume")
+    }
+
+    fun restartInventory() {
+        if (_inventoryStatus.value != "Ready") {
+            try {
+                inventoryRestart()
+            } catch (e: Exception) {
+                Log.e("RFID_restartInventory", "⚠️ Error restarting inventory: ${e.message}")
+                updateInventoryStatus("Error")
+            }
+        }
+    }
+
+    private fun inventoryRestart() {
+        _tagDataList.clear()
+        _tagsFlow.value = emptyList()
+        _filesFlow.value = emptyList()
+        updateInventoryStatus("Ready")
+    }
+
+    fun retryConnection() {
+        updateInventoryStatus("Connecting")
+        connectReader()
+    }
+
+    private fun updateInventoryStatus(status: String) {
+        viewModelScope.launch {
+            _inventoryStatus.value = status
+            Log.d("RFID_updateInventoryStatus", "🔵 Status: $status")
         }
     }
 
     private fun connectReader() {
-
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val availableRFIDReaderList = readers.GetAvailableRFIDReaderList()
-                Log.i(
-                    "RFID_connectReader",
-                    "Available readers: ${availableRFIDReaderList?.size ?: 0}"
-                )
-                if (!availableRFIDReaderList.isNullOrEmpty()) {
-                    readerDevice = availableRFIDReaderList[0]
-                    reader = readerDevice?.rfidReader?.apply {
-                        connect()
-                        configureReader(this)
+                var attempts = 0
+                var availableRFIDReaderList: List<ReaderDevice>? = null
+
+                while (attempts < 15) {
+                    availableRFIDReaderList = readers.GetAvailableRFIDReaderList()
+
+                    if (!availableRFIDReaderList.isNullOrEmpty()) {
+                        Log.i("RFID_connectReader", "✅ Lector encontrado en intento $attempts")
+                        break
                     }
+
+                    Log.i(
+                        "RFID_connectReader",
+                        "⏱️ No hay lectores disponibles, reintentando... ($attempts/30)"
+                    )
+                    attempts++
+                    delay(1000)
                 }
-            }.onFailure {
-                handleException(it)
+
+                if (availableRFIDReaderList.isNullOrEmpty()) {
+                    throw IllegalStateException("No se encontraron lectores disponibles")
+                }
+
+                readerDevice = availableRFIDReaderList[0]
+                reader = readerDevice?.rfidReader?.apply {
+                    connect()
+                    configureReader(this)
+                }
+
+            }.onFailure { exception ->
+                Log.e("RFID_connectReader", "⚠️ Error al conectar el lector RFID")
+                handleException(exception)
             }
         }
     }
@@ -130,7 +201,7 @@ class InventoryViewModel @Inject constructor(
             setupEventConfig(reader)
         }.onSuccess {
             updateInventoryStatus("Ready")
-            Log.i("RFID_configureReader", "RFID reader configured and ready!")
+            Log.i("RFID_configureReader", "✅ RFID reader configured and ready!")
         }.onFailure {
             handleException(it)
         }
@@ -170,9 +241,10 @@ class InventoryViewModel @Inject constructor(
 
     private fun handleException(exception: Throwable) {
         val message = when (exception) {
-            is InvalidUsageException -> "Invalid usage: ${exception.message}"
-            is OperationFailureException -> "Operation failed: ${exception.vendorMessage}"
-            else -> "Unexpected error: ${exception.message}"
+            is InvalidUsageException -> "⚠️ Invalid usage: ${exception.message}"
+            is OperationFailureException -> "⚠️ Operation failed: ${exception.vendorMessage}"
+            is IllegalStateException -> "⚠️ Illegal state: ${exception.message}"
+            else -> "⚠️ Unexpected error: ${exception.message}"
         }
         updateInventoryStatus("Error")
         Log.e("RFID_handleException", message)
@@ -182,7 +254,6 @@ class InventoryViewModel @Inject constructor(
         super.onCleared()
         reader?.let {
             try {
-                inventoryStop()
                 it.disconnect()
                 reader = null;
                 readers.Dispose();
@@ -266,58 +337,26 @@ class InventoryViewModel @Inject constructor(
 
     }
 
-    private fun inventoryPerform() {
-
-        val tagAccess = TagAccess()
-
-        // 128 BITS 32 CHARS - 256 BITS 64 CHARS
-        val readAccessParams = tagAccess.ReadAccessParams().apply {
-            accessPassword = 0
-            count = 8 //8 NIBBLES 32 CHARS - 9 NIBBLES 36 CHARS
-            memoryBank = MEMORY_BANK.MEMORY_BANK_USER
-            offset = 0 //0 NIBBLES - 4 NIBBLES 16 CHARS
-        }
-
-        updateInventoryStatus("Reading")
-        reader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
-
-    }
-
-    private fun inventoryStop() {
-        updateInventoryStatus("Stopped")
-        reader?.Actions?.Inventory?.stop()
-    }
-
-    private fun inventoryResume() {
-        createExcelFile(context, tagsFlow.value)
-        updateInventoryStatus("Resume")
-        reader?.Actions?.Inventory?.stop()
-    }
-
     private fun hexToAscii(hex: String): String {
         return hex.chunked(2).mapNotNull { it.toIntOrNull(16)?.toChar() }.joinToString("")
     }
 
-    private fun createExcelFile(context: Context, tagsFlow: List<TagDataInfo>) {
-        val workshop = "taller123"
+    private fun getActualDate(): String =
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+
+    private fun createExcelFile(context: Context, tagsFlow: List<TagDataInfo>, workshop: String) {
         val timestamp = getActualDate()
         val fileName = "$workshop $timestamp.xls"
 
         val workbook = HSSFWorkbook()
         val sheet = workbook.createSheet("Hoja de datos")
 
-        var row = sheet.createRow(1)
-        row.createCell(0).setCellValue("Localization")
-
-        row = sheet.createRow(2)
-        row.createCell(0).setCellValue(timestamp)
-
-        row = sheet.createRow(3)
-        row.createCell(0).setCellValue("Chasises")
+        listOf("Localization", timestamp, "Chasises").forEachIndexed { index, text ->
+            sheet.createRow(index + 1).createCell(0).setCellValue(text)
+        }
 
         tagsFlow.forEachIndexed { index, tag ->
-            row = sheet.createRow(index + 4)
-            row.createCell(0).setCellValue(tag.vin)
+            sheet.createRow(index + 5).createCell(0).setCellValue(tag.vin)
         }
 
         val contentValues = ContentValues().apply {
@@ -328,6 +367,19 @@ class InventoryViewModel @Inject constructor(
 
         val resolver = context.contentResolver
         val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+        /*uri?.let {
+            runCatching {
+                resolver.openOutputStream(it)?.use { fos ->
+                    workbook.use { wb -> wb.write(fos) }
+                }
+                Log.d("Excel", "📁 Archivo guardado en: $fileName")
+            }.onFailure { e ->
+                Log.e("Excel", "⚠️ Error al guardar el archivo: ${e.message}")
+            }
+        } ?: run {
+            Log.e("Excel", "⚠️ Error al obtener URI para el archivo")
+        }*/
 
         uri?.let {
             try {
@@ -345,7 +397,41 @@ class InventoryViewModel @Inject constructor(
 
     }
 
-    private fun getActualDate(): String =
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+    private fun listExcelFiles(context: Context, workshop: String) {
+        val folderPath = "Download/Catalogos/$workshop/"
+        val projection = arrayOf(
+            MediaStore.Downloads.DISPLAY_NAME,
+            MediaStore.Downloads.DATE_MODIFIED
+        )
+        val selection = "${MediaStore.Downloads.RELATIVE_PATH} = ?"
+        val selectionArgs = arrayOf(folderPath)
+        val sortOrder = "${MediaStore.Downloads.DATE_MODIFIED} DESC"
+        val excelFiles = mutableListOf<String>()
+
+        context.contentResolver.query(
+            //MediaStore.Files.getContentUri("external"),
+            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+            projection, selection, selectionArgs, sortOrder
+        )?.use { cursor ->
+            val nameColumn = cursor.getColumnIndex(MediaStore.Downloads.DISPLAY_NAME)
+
+            while (cursor.moveToNext()) {
+                val fileName = cursor.getString(nameColumn)
+                Log.d("Excel", "📂 Archivo encontrado: $fileName")
+
+                if (fileName.endsWith(".xls", ignoreCase = true)) {
+                    //Log.d("Excel", "📁 Archivo detectado: $fileName")
+                    excelFiles.add(fileName)
+                }
+
+            }
+
+            _filesFlow.value = excelFiles
+
+        }
+
+        Log.d("Excel", "📂 Archivos XLS encontrados: ${_filesFlow.value.size}")
+
+    }
 
 }
