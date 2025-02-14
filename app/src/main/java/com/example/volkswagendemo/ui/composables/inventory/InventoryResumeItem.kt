@@ -1,7 +1,6 @@
 package com.example.volkswagendemo.ui.composables.inventory
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +26,7 @@ fun InventoryResumeItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(73.dp)
+            .height(72.dp)
             .padding(horizontal = 16.dp)
             .clickable { onClickListener() }
             .drawBehind {
@@ -42,23 +41,21 @@ fun InventoryResumeItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.outline_file_present_24),
-            contentDescription = null
+            painter = painterResource(R.drawable.file_icon),
+            contentDescription = null,
+            tint = Color(0xFF05A6E1)
         )
-        Column(
+        Text(
+            text = fileName,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 16.dp)
-        ) {
-            Text(
-                text = fileName,
-                fontSize = 16.sp
-            )
-            Text(
-                text = "catalogoln.xls",
-                fontSize = 16.sp
-            )
-        }
+                .padding(start = 16.dp),
+            fontSize = 16.sp
+        )
+        Icon(
+            painter = painterResource(R.drawable.share),
+            contentDescription = null
+        )
     }
 }
 
@@ -66,7 +63,7 @@ fun InventoryResumeItem(
 @Composable
 fun InventoryResumeItemPreview() {
     InventoryResumeItem(
-        fileName = "Taller123 2024-12-18 14:02:00",
+        fileName = "Taller123 2024-12-18 14:02:00 catalogoln.xls",
         onClickListener = {}
     )
 }

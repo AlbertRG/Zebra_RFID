@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,9 +16,11 @@ import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
 fun InventoryResume(
-    inventoryViewModel: InventoryViewModel,
-    files: List<String>
+    inventoryViewModel: InventoryViewModel
 ) {
+
+    val files by inventoryViewModel.filesFlow.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,16 +36,16 @@ fun InventoryResume(
             items(files) { file ->
                 InventoryResumeItem(
                     fileName = file,
-                    onClickListener = {}
+                    onClickListener = { inventoryViewModel.readSpecificExcelFile(file) }
                 )
             }
         }
         InventoryBottomBar(
             isDualMode = false,
             title = "Nueva Lectura",
-            onClickListener = {inventoryViewModel.restartInventory()},
+            onClickListener = { inventoryViewModel.restartInventory() },
             title2 = "",
-            onClickListener2 = {}
+            onClickListener2 = { }
         )
     }
 }

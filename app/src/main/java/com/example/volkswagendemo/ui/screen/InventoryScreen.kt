@@ -22,6 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.dialog.FileDialog
+import com.example.volkswagendemo.ui.composables.dialog.InventoryDialog
 import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
 import com.example.volkswagendemo.ui.composables.inventory.InventoryError
 import com.example.volkswagendemo.ui.composables.inventory.InventoryReading
@@ -38,8 +40,8 @@ fun InventoryScreen(
 ) {
 
     val rfidStatus by inventoryViewModel.inventoryStatus.collectAsState()
+    val showFileDialog by inventoryViewModel.showFileDialog.collectAsState()
     val tags by inventoryViewModel.tagsFlow.collectAsState()
-    val files by inventoryViewModel.filesFlow.collectAsState()
 
     Scaffold(
         topBar = {
@@ -107,10 +109,15 @@ fun InventoryScreen(
                     "Ready" -> InventoryReady(inventoryViewModel)
                     "Reading" -> InventoryReading(inventoryViewModel, tags)
                     "Stopped" -> InventoryStopped(inventoryViewModel, tags)
-                    "Resume" -> InventoryResume(inventoryViewModel, files)
+                    "Resume" -> InventoryResume(inventoryViewModel)
                     "Error" -> InventoryError(inventoryViewModel)
                 }
             }
         }
     }
+
+    if (showFileDialog) {
+        FileDialog(inventoryViewModel)
+    }
+
 }

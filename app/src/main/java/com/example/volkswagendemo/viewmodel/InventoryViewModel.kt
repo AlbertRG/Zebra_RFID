@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.viewmodel
 
 import android.app.Application
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
@@ -48,6 +49,11 @@ class InventoryViewModel @Inject constructor(
     private val _inventoryStatus = MutableStateFlow("Connecting")
     val inventoryStatus: StateFlow<String> = _inventoryStatus.asStateFlow()
 
+    private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
+    private var readerDevice: ReaderDevice? = null
+    private var reader: RFIDReader? = null
+    private val eventHandler = EventHandler()
+
     private val _tagDataList = mutableListOf<TagDataInfo>()
     private val _tagsFlow = MutableStateFlow<List<TagDataInfo>>(emptyList())
     val tagsFlow: StateFlow<List<TagDataInfo>> = _tagsFlow.asStateFlow()
@@ -55,10 +61,14 @@ class InventoryViewModel @Inject constructor(
     private val _filesFlow = MutableStateFlow<List<String>>(emptyList())
     val filesFlow: StateFlow<List<String>> = _filesFlow.asStateFlow()
 
-    private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
-    private var readerDevice: ReaderDevice? = null
-    private var reader: RFIDReader? = null
-    private val eventHandler = EventHandler()
+    private val _showFileDialog = MutableStateFlow(false)
+    var showFileDialog: StateFlow<Boolean> = _showFileDialog.asStateFlow()
+
+    private val _vinFlow = MutableStateFlow<List<String>>(emptyList())
+    val vinFlow: StateFlow<List<String>> = _vinFlow.asStateFlow()
+
+    private val _fileName = MutableStateFlow("")
+    val fileName: StateFlow<String> = _fileName.asStateFlow()
 
     init {
         connectReader()
@@ -120,8 +130,8 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun inventoryResume() {
-        createExcelFile(context, tagsFlow.value, "taller123")
-        listExcelFiles(context, "taller123")
+        writeExcelFile(context, tagsFlow.value, "taller123")
+        indexExcelFiles(context, "taller123")
         updateInventoryStatus("Resume")
     }
 
@@ -344,10 +354,9 @@ class InventoryViewModel @Inject constructor(
     private fun getActualDate(): String =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
-    private fun createExcelFile(context: Context, tagsFlow: List<TagDataInfo>, workshop: String) {
+    private fun writeExcelFile(context: Context, tagsFlow: List<TagDataInfo>, workshop: String) {
         val timestamp = getActualDate()
-        val fileName = "$workshop $timestamp.xls"
-
+        val fileName = "$workshop $timestamp catalogoln.xls"
         val workbook = HSSFWorkbook()
         val sheet = workbook.createSheet("Hoja de datos")
 
@@ -356,7 +365,7 @@ class InventoryViewModel @Inject constructor(
         }
 
         tagsFlow.forEachIndexed { index, tag ->
-            sheet.createRow(index + 5).createCell(0).setCellValue(tag.vin)
+            sheet.createRow(index + 4).createCell(0).setCellValue(tag.vin)
         }
 
         val contentValues = ContentValues().apply {
@@ -368,7 +377,7 @@ class InventoryViewModel @Inject constructor(
         val resolver = context.contentResolver
         val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
 
-        /*uri?.let {
+        uri?.let {
             runCatching {
                 resolver.openOutputStream(it)?.use { fos ->
                     workbook.use { wb -> wb.write(fos) }
@@ -379,38 +388,24 @@ class InventoryViewModel @Inject constructor(
             }
         } ?: run {
             Log.e("Excel", "⚠️ Error al obtener URI para el archivo")
-        }*/
-
-        uri?.let {
-            try {
-                resolver.openOutputStream(it)?.use { fos ->
-                    workbook.write(fos)
-                }
-                Log.d("Excel", "📁 Archivo guardado en: $fileName")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.e("Excel", "⚠️ Error al guardar el archivo: ${e.message}")
-            } finally {
-                workbook.close()
-            }
         }
 
     }
 
-    private fun listExcelFiles(context: Context, workshop: String) {
-        val folderPath = "Download/Catalogos/$workshop/"
+    private fun indexExcelFiles(context: Context, workshop: String) {
+        val folderPath = "Download/Catalogos/$workshop"
         val projection = arrayOf(
-            MediaStore.Downloads.DISPLAY_NAME,
-            MediaStore.Downloads.DATE_MODIFIED
+            MediaStore.Files.FileColumns.DISPLAY_NAME,
+            MediaStore.Files.FileColumns.DATE_MODIFIED
         )
-        val selection = "${MediaStore.Downloads.RELATIVE_PATH} = ?"
-        val selectionArgs = arrayOf(folderPath)
-        val sortOrder = "${MediaStore.Downloads.DATE_MODIFIED} DESC"
+        val selection =
+            "${MediaStore.Files.FileColumns.RELATIVE_PATH} LIKE ? AND ${MediaStore.Files.FileColumns.MIME_TYPE} = ?"
+        val selectionArgs = arrayOf("$folderPath%", "application/vnd.ms-excel")
+        val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
         val excelFiles = mutableListOf<String>()
 
         context.contentResolver.query(
-            //MediaStore.Files.getContentUri("external"),
-            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+            MediaStore.Files.getContentUri("external"),
             projection, selection, selectionArgs, sortOrder
         )?.use { cursor ->
             val nameColumn = cursor.getColumnIndex(MediaStore.Downloads.DISPLAY_NAME)
@@ -423,15 +418,59 @@ class InventoryViewModel @Inject constructor(
                     //Log.d("Excel", "📁 Archivo detectado: $fileName")
                     excelFiles.add(fileName)
                 }
-
             }
-
             _filesFlow.value = excelFiles
-
         }
-
         Log.d("Excel", "📂 Archivos XLS encontrados: ${_filesFlow.value.size}")
+    }
 
+    fun readSpecificExcelFile(fileName: String) {
+        _vinFlow.value = readExcelFile(context, fileName)
+        _fileName.value = fileName
+        _showFileDialog.value = true
+    }
+
+    private fun readExcelFile(context: Context, fileName: String): List<String> {
+        val vinsList = mutableListOf<String>()
+        val projection = arrayOf(MediaStore.Downloads._ID)
+        val selection = "${MediaStore.Downloads.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf(fileName)
+
+        context.contentResolver.query(
+            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+            projection, selection, selectionArgs, null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idColumn = cursor.getColumnIndex(MediaStore.Downloads._ID)
+                val fileId = cursor.getLong(idColumn)
+                val fileUri =
+                    ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, fileId)
+
+                runCatching {
+                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                        HSSFWorkbook(inputStream).use { workbook ->
+                            val sheet = workbook.getSheetAt(0)
+
+                            for (rowIndex in 4 until sheet.physicalNumberOfRows + 1) {
+                                val row = sheet.getRow(rowIndex)
+                                row?.getCell(0)?.toString()?.trim()?.let { vin ->
+                                    if (vin.isNotEmpty()) {
+                                        vinsList.add(vin)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.onFailure { e ->
+                    Log.e("Excel", "⚠️ Error al leer el archivo: ${e.message}")
+                }
+            }
+        }
+        return vinsList
+    }
+
+    fun closeFileDialog() {
+        _showFileDialog.value = false
     }
 
 }
