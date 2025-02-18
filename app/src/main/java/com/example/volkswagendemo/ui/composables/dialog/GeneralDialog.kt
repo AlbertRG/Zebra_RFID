@@ -83,7 +83,7 @@ fun GeneralDialog(
 @Composable
 fun GeneralDialogPreview() {
     GeneralDialog(
-        icon = R.drawable.outline_location_on_24,
+        icon = R.drawable.location,
         dialogTitle = "Localizacion",
         dialogText =    "Longitud: -99.1233243\n" +
                         "Latitud: 19.4031022\n" +

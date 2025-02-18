@@ -1,5 +1,8 @@
 package com.example.volkswagendemo.ui.composables.home
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +16,18 @@ fun HomeColumn(
     homeViewModel: HomeViewModel,
     navigateToSearch: () -> Unit
 ) {
+
+    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true &&
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            ) {
+                homeViewModel.showLocalizationDialog()
+            }
+        }
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -21,20 +36,33 @@ fun HomeColumn(
         HomeCard(
             title = "Inventario",
             description = "Genera archivos de REPUVES",
-            icon = R.drawable.baseline_list_alt_24,
-            onClick = { homeViewModel.showInventoryDialog = true }
+            icon = R.drawable.baseline_list,
+            onClick = { homeViewModel.showWorkshopDialog = true }
         )
         HomeCard(
             title = "Busqueda",
             description = "Compara REPUVES con un archivo",
-            icon = R.drawable.baseline_manage_search_24,
+            icon = R.drawable.manage_search,
             onClick = { navigateToSearch() }
         )
         HomeCard(
             title = "Localizacion",
             description = "Actualiza tu localizacion",
-            icon = R.drawable.outline_location_on_24,
-            onClick = { homeViewModel.showLocalizationDialog = true }
+            icon = R.drawable.location,
+            onClick = {
+                if (homeViewModel.hasLocationPermission()) {
+                    homeViewModel.showLocalizationDialog()
+                } else {
+                    requestLocationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+                    )
+                }
+
+
+            }
         )
     }
 }

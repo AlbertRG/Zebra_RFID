@@ -1,6 +1,6 @@
-package com.example.volkswagendemo.core.dataclass
+package com.example.volkswagendemo.data
 
-data class TagDataInfo(
+data class TagData(
     val repuve: String,
     val vin: String,
     val controlData: String,

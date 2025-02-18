@@ -10,3 +10,9 @@ object Inventory
 
 @Serializable
 object Search
+
+@Serializable
+object Battery
+
+@Serializable
+object Settings

@@ -2,8 +2,6 @@ package com.example.volkswagendemo.ui.composables.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,7 +22,9 @@ import com.example.volkswagendemo.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopBar() {
+fun HomeTopBar(
+    onClickListener: () -> Unit = {}
+) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color.White,
@@ -40,10 +40,10 @@ fun HomeTopBar() {
         },
         navigationIcon = {
             IconButton(
-                onClick = {}
+                onClick = { }
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.volkswagen_logo),
+                    painter = painterResource(R.drawable.volkswagen_logo),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     alignment = Alignment.Center,
@@ -53,13 +53,12 @@ fun HomeTopBar() {
         },
         actions = {
             IconButton(
-                onClick = {
-                    /* TODO: Open drawer to show version */
-                }
+                onClick = { onClickListener() }
             ) {
                 Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = null
+                    painter = painterResource(R.drawable.menu),
+                    contentDescription = null,
+                    tint = Color.Black
                 )
             }
         }
@@ -69,5 +68,5 @@ fun HomeTopBar() {
 @Preview(showBackground = true)
 @Composable
 fun HomeTopBarPreview() {
-    HomeTopBar()
+    HomeTopBar {}
 }

@@ -89,6 +89,6 @@ fun HomeCardPreview() {
     HomeCard(
         title = "Inventario",
         description = "Escanea y registra chasises con RFID",
-        icon = R.drawable.baseline_list_alt_24
+        icon = R.drawable.baseline_list
     )
 }

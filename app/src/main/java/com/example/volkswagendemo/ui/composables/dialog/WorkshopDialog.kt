@@ -135,7 +135,7 @@ fun InventoryDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            homeViewModel.showInventoryDialog = false
+                            homeViewModel.showWorkshopDialog = false
                         }
                     ) {
                         Text(
@@ -146,7 +146,7 @@ fun InventoryDialog(
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(
                         onClick = {
-                            homeViewModel.showInventoryDialog = false
+                            homeViewModel.showWorkshopDialog = false
                             navigateToInventory()
                         }) {
                         Text(
