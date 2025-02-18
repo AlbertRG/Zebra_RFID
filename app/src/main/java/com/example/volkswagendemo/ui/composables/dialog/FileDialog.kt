@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,19 +68,20 @@ fun FileDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.file_icon),
+                    painter = painterResource(R.drawable.google_sheets_icon),
                     contentDescription = null,
-                    modifier = Modifier.padding(8.dp),
-                    tint = Color(0xFF05A6E1)
+                    modifier = Modifier
+                        .size(24.dp),
+                    tint = Color.Unspecified
                 )
                 Text(
                     text = fileName,
-                    modifier = Modifier.padding(8.dp),
-                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(top = 16.dp),
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 if (isLocationSave) {
@@ -91,49 +93,44 @@ fun FileDialog(
                     ) {
                         Text(
                             buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
                                     append("Longitud: ")
                                 }
                                 append("-99.123456")
                             },
                             modifier = Modifier
                                 .padding(vertical = 4.dp),
+                            color = Color.Black,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
                         Text(
                             buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
                                     append("Latitud: ")
                                 }
                                 append("19.123456")
                             },
                             modifier = Modifier
                                 .padding(vertical = 4.dp),
+                            color = Color.Black,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
                         Text(
                             text = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal.",
                             modifier = Modifier.padding(bottom = 16.dp),
+                            color = Color.Black,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
+                        HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
                     }
                 }
                 LazyColumn(
                     modifier = Modifier
                         .height(200.dp)
-                        .fillMaxWidth()
-                        .drawBehind {
-                            val strokeWidth = 1.dp.toPx()
-                            drawLine(
-                                color = Color(0xFFF0F0F0),
-                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                end = androidx.compose.ui.geometry.Offset(size.width, 0f),
-                                strokeWidth = strokeWidth
-                            )
-                        },
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     items(vins) { vin ->
@@ -164,7 +161,7 @@ fun FileDialog(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(
-                        onClick = { inventoryViewModel.closeFileDialog()}
+                        onClick = { inventoryViewModel.closeFileDialog() }
                     ) {
                         Text(
                             text = "Aceptar",

@@ -2,13 +2,15 @@ package com.example.volkswagendemo.ui.composables.inventory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,18 +62,16 @@ fun InventoryError(
             color = Color.Gray,
             fontSize = 14.sp,
         )
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd
-    ) {
-        InventoryBottomBar(
-            isDualMode = false,
-            title = "Reintentar",
-            onClickListener = { inventoryViewModel.retryConnection() },
-            title2 = "",
-            onClickListener2 = {}
-        )
+        Button(
+            onClick = { inventoryViewModel.retryConnection() },
+            modifier = Modifier
+                .width(240.dp)
+                .padding(vertical = 24.dp),
+            colors = ButtonDefaults.buttonColors(Color(0xFF05A6E1))
+        ) {
+            Text(
+                text = "Reintentar"
+            )
+        }
     }
 }

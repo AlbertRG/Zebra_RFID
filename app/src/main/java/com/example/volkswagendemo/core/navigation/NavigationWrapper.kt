@@ -1,13 +1,18 @@
 package com.example.volkswagendemo.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.volkswagendemo.ui.screen.BatteryScreen
 import com.example.volkswagendemo.ui.screen.HomeScreen
 import com.example.volkswagendemo.ui.screen.InventoryScreen
 import com.example.volkswagendemo.ui.screen.SearchScreen
+import com.example.volkswagendemo.ui.screen.SettingsScreen
+import com.example.volkswagendemo.utils.LocationUtils
+import com.example.volkswagendemo.viewmodel.BatteryViewModel
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
@@ -23,7 +28,10 @@ fun NavigationWrapper() {
             HomeScreen(
                 homeViewModel,
                 { navController.navigate(Inventory) },
-                { navController.navigate(Search) })
+                { navController.navigate(Search) },
+                { navController.navigate(Battery) },
+                { navController.navigate(Settings) }
+            )
         }
 
         composable<Inventory> {
@@ -43,6 +51,21 @@ fun NavigationWrapper() {
             }
         }
 
-    }
+        composable<Battery> {
+            val batteryViewModel = hiltViewModel<BatteryViewModel>()
+            BatteryScreen(batteryViewModel) {
+                navController.navigate(Home) {
+                    popUpTo<Home> { inclusive = true }
+                }
+            }
+        }
 
+        composable<Settings> {
+            SettingsScreen {
+                navController.navigate(Home) {
+                    popUpTo<Home> { inclusive = true }
+                }
+            }
+        }
+    }
 }

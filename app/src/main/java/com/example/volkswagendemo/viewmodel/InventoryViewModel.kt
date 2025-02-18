@@ -8,7 +8,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.volkswagendemo.core.dataclass.TagDataInfo
+import com.example.volkswagendemo.data.TagData
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
@@ -45,7 +45,7 @@ class InventoryViewModel @Inject constructor(
     application: Application
 ) : ViewModel() {
 
-    val context = application.applicationContext
+    private val context = application.applicationContext
     private val _inventoryStatus = MutableStateFlow("Connecting")
     val inventoryStatus: StateFlow<String> = _inventoryStatus.asStateFlow()
 
@@ -54,9 +54,9 @@ class InventoryViewModel @Inject constructor(
     private var reader: RFIDReader? = null
     private val eventHandler = EventHandler()
 
-    private val _tagDataList = mutableListOf<TagDataInfo>()
-    private val _tagsFlow = MutableStateFlow<List<TagDataInfo>>(emptyList())
-    val tagsFlow: StateFlow<List<TagDataInfo>> = _tagsFlow.asStateFlow()
+    private val _tagDataList = mutableListOf<TagData>()
+    private val _tagsFlow = MutableStateFlow<List<TagData>>(emptyList())
+    val tagsFlow: StateFlow<List<TagData>> = _tagsFlow.asStateFlow()
 
     private val _filesFlow = MutableStateFlow<List<String>>(emptyList())
     val filesFlow: StateFlow<List<String>> = _filesFlow.asStateFlow()
@@ -181,7 +181,7 @@ class InventoryViewModel @Inject constructor(
 
                     Log.i(
                         "RFID_connectReader",
-                        "⏱️ No hay lectores disponibles, reintentando... ($attempts/30)"
+                        "⏱️ No hay lectores disponibles, reintentando... ($attempts/15)"
                     )
                     attempts++
                     delay(1000)
@@ -265,8 +265,8 @@ class InventoryViewModel @Inject constructor(
         reader?.let {
             try {
                 it.disconnect()
-                reader = null;
-                readers.Dispose();
+                reader = null
+                readers.Dispose()
                 Log.i("RFID_onCleared", "Reader disconnected")
             } catch (e: Exception) {
                 Log.e("RFID_onCleared", "Error disconnecting reader: ${e.message}")
@@ -286,17 +286,17 @@ class InventoryViewModel @Inject constructor(
                     val vin = hexToAscii(tag.memoryBankData).take(16)
 
                     if (repuve.all { it.isDigit() }) {
-                        val tagDataInfo =
-                            TagDataInfo(
+                        val tagData =
+                            TagData(
                                 repuve = repuve,
                                 vin = vin,
                                 controlData = rawMemoryData
                             )
                         Log.d(
                             "RFID_eventReadNotify",
-                            "Tag Data Info: ${tagDataInfo.repuve} - ${tagDataInfo.vin}"
+                            "Tag Data Info: ${tagData.repuve} - ${tagData.vin}"
                         )
-                        _tagDataList.add(tagDataInfo)
+                        _tagDataList.add(tagData)
                         _tagsFlow.value = _tagDataList.toList().distinctBy { it.repuve }.reversed()
                     }
 
@@ -352,9 +352,9 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun getActualDate(): String =
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+        SimpleDateFormat("yyyy-MM-dd HH-mm-ss", Locale.getDefault()).format(Date())
 
-    private fun writeExcelFile(context: Context, tagsFlow: List<TagDataInfo>, workshop: String) {
+    private fun writeExcelFile(context: Context, tagsFlow: List<TagData>, workshop: String) {
         val timestamp = getActualDate()
         val fileName = "$workshop $timestamp catalogoln.xls"
         val workbook = HSSFWorkbook()
@@ -369,13 +369,16 @@ class InventoryViewModel @Inject constructor(
         }
 
         val contentValues = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-            put(MediaStore.Downloads.MIME_TYPE, "application/vnd.ms-excel")
-            put(MediaStore.Downloads.RELATIVE_PATH, "Download/Catalogos/${workshop}")
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.ms-excel")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/Catalogos/$workshop")
         }
 
         val resolver = context.contentResolver
-        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        val uri = resolver.insert(
+            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+            contentValues
+        )
 
         uri?.let {
             runCatching {
@@ -393,22 +396,22 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun indexExcelFiles(context: Context, workshop: String) {
-        val folderPath = "Download/Catalogos/$workshop"
+        val folderPath = "Documents/Catalogos/$workshop/"
         val projection = arrayOf(
             MediaStore.Files.FileColumns.DISPLAY_NAME,
             MediaStore.Files.FileColumns.DATE_MODIFIED
         )
         val selection =
-            "${MediaStore.Files.FileColumns.RELATIVE_PATH} LIKE ? AND ${MediaStore.Files.FileColumns.MIME_TYPE} = ?"
-        val selectionArgs = arrayOf("$folderPath%", "application/vnd.ms-excel")
+            "${MediaStore.Files.FileColumns.RELATIVE_PATH} = ? AND ${MediaStore.Files.FileColumns.MIME_TYPE} = ?"
+        val selectionArgs = arrayOf(folderPath, "application/vnd.ms-excel")
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
         val excelFiles = mutableListOf<String>()
 
         context.contentResolver.query(
-            MediaStore.Files.getContentUri("external"),
+            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
             projection, selection, selectionArgs, sortOrder
         )?.use { cursor ->
-            val nameColumn = cursor.getColumnIndex(MediaStore.Downloads.DISPLAY_NAME)
+            val nameColumn = cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)
 
             while (cursor.moveToNext()) {
                 val fileName = cursor.getString(nameColumn)
@@ -419,8 +422,8 @@ class InventoryViewModel @Inject constructor(
                     excelFiles.add(fileName)
                 }
             }
-            _filesFlow.value = excelFiles
         }
+        _filesFlow.value = excelFiles
         Log.d("Excel", "📂 Archivos XLS encontrados: ${_filesFlow.value.size}")
     }
 
@@ -428,6 +431,10 @@ class InventoryViewModel @Inject constructor(
         _vinFlow.value = readExcelFile(context, fileName)
         _fileName.value = fileName
         _showFileDialog.value = true
+    }
+
+    fun closeFileDialog() {
+        _showFileDialog.value = false
     }
 
     private fun readExcelFile(context: Context, fileName: String): List<String> {
@@ -467,10 +474,6 @@ class InventoryViewModel @Inject constructor(
             }
         }
         return vinsList
-    }
-
-    fun closeFileDialog() {
-        _showFileDialog.value = false
     }
 
 }
