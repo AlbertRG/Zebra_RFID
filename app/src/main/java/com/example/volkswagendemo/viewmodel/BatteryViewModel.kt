@@ -107,7 +107,7 @@ class BatteryViewModel @Inject constructor(
             batteryStats.batteryId,
             "${batteryStats.health}%",
             "${batteryStats.cycleCount}",
-            "${batteryStats.percentage}%",
+            "${batteryStats.percentage}",
             "${batteryStats.temperature}°C"
         )
     }

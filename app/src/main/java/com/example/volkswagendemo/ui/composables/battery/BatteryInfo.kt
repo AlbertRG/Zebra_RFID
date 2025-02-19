@@ -1,21 +1,24 @@
 package com.example.volkswagendemo.ui.composables.battery
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
 
@@ -25,76 +28,71 @@ fun BatteryInfo(
 ) {
 
     val batteryInfo by batteryViewModel.batteryInfo.collectAsState()
-    val batteryPercentage = batteryInfo[5].replace("%", "").toInt()
-
-    val batteryIcon = when {
-        batteryPercentage in 91..100 -> R.drawable.battery_100
-        batteryPercentage in 60..90 -> R.drawable.battery_075
-        batteryPercentage in 41..59 -> R.drawable.battery_050
-        batteryPercentage in 10..40 -> R.drawable.battery_025
-        else -> R.drawable.battery_000
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Top
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                painter = painterResource(batteryIcon),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(160.dp),
-                tint = Color(0xFF05A6E1)
+        BatteryPercentage(batteryInfo[5].toInt())
+        Spacer(modifier = Modifier.height(16.dp))
+        BatteryInfoCard(
+            icon = R.drawable.battery_profile,
+            title = "Detalles Generales",
+            infoList = listOf(
+                "Fecha de manufactura" to batteryInfo[0],
+                "Número de modelo" to batteryInfo[1],
+                "ID de batería" to batteryInfo[2]
             )
-        }
-        BatteryInfoTitle(
-            "Estado de la batería"
         )
-        BatteryInfoItem(
-            "Porcentaje de carga",
-            batteryInfo[5]
+        BatteryInfoCard(
+            icon = R.drawable.health_metrics,
+            title = "Indicadores de Salud",
+            infoList = listOf(
+                "Estado de salud" to batteryInfo[3],
+                "Ciclos de carga consumidos" to batteryInfo[4]
+            )
         )
-        BatteryInfoTitle(
-            "Información sobre la batería"
+        BatteryInfoCard(
+            icon = R.drawable.thermostat,
+            title = "Temperatura de Funcionamiento",
+            infoList = listOf(
+                "Actual" to batteryInfo[6]
+            )
         )
-        BatteryInfoItem(
-            "Manufacture Date",
-            batteryInfo[0]
-        )
-        BatteryInfoItem(
-            "Fecha fabricación",
-            batteryInfo[1]
-        )
-        BatteryInfoItem(
-            "Batería ID",
-            batteryInfo[2]
-        )
-        BatteryInfoTitle(
-            "Estadísticas de duración de la batería"
-        )
-        BatteryInfoItem(
-            "Estado de salud",
-            batteryInfo[3]
-        )
-        BatteryInfoItem(
-            "Ciclos de carga consumidos",
-            batteryInfo[4]
-        )
-        BatteryInfoTitle(
-            "Temperatura de la batería"
-        )
-        BatteryInfoItem(
-            "Actual",
-            batteryInfo[6]
-        )
-
     }
+}
+
+@Composable
+fun BatteryPercentage(
+    percentage: Int
+) {
+    Row(
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Text(
+            text = percentage.toString(),
+            color = Color(0xFF05A6E1),
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "%",
+            modifier = Modifier
+                .padding(bottom = 4.dp),
+            color = Color(0xFF05A6E1),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+    LinearProgressIndicator(
+        progress = { percentage / 100f },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp),
+        color = Color(0xFF05A6E1),
+        trackColor = Color.LightGray,
+        gapSize = (-5).dp
+    )
 }

@@ -1,20 +1,15 @@
-package com.example.volkswagendemo.ui.composables.home
+package com.example.volkswagendemo.ui.composables.battery
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,17 +24,15 @@ import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
 
 @Composable
-fun HomeCard(
-    title: String,
-    description: String,
+fun BatteryInfoCard(
     icon: Int,
-    onClick: () -> Unit = {}
+    title: String,
+    infoList: List<Pair<String, String>>
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onClick() },
+            .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x40AEE3F6)
         ),
@@ -47,48 +40,73 @@ fun HomeCard(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Start,
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
+            Column(
                 modifier = Modifier
-                    .size(48.dp)
-                    .background(color = Color(0xFF05A6E1), shape = CircleShape)
+                    .width(48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
                     painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = Color.White
+                    contentDescription = title
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
                 Text(
                     text = title,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp),
                     color = Color.Black,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = description,
-                    color = Color.Black,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal
-                )
+                HorizontalDivider(thickness = 1.dp)
+                infoList.forEach { (label, value) ->
+                    BatteryInfoCardItem(label, value)
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun HomeCardPreview() {
-    HomeCard(
-        title = "Inventario",
-        description = "Escanea y registra chasises con RFID",
-        icon = R.drawable.baseline_list
+fun BatteryInfoCardItem(
+    title: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = title,
+            color = Color.Black,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal
+        )
+        Text(
+            text = value,
+            color = Color.Black,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun BatteryInfoCardPreview() {
+    BatteryInfoCard(
+        icon = R.drawable.battery,
+        title = "Battery",
+        infoList = listOf("Title" to "value")
     )
 }
