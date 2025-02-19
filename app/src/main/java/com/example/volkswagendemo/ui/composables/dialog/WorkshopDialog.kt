@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,15 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.volkswagendemo.data.LocationData
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 
 @Composable
-fun InventoryDialog(
+fun WorkshopDialog(
     homeViewModel: HomeViewModel,
     navigateToInventory: () -> Unit
 ) {
@@ -53,7 +52,7 @@ fun InventoryDialog(
     ) {
         Card(
             modifier = Modifier
-                .width(320.dp),
+                .fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(Color.White)
         ) {
@@ -86,7 +85,8 @@ fun InventoryDialog(
                     value = workshop,
                     onValueChange = { newText -> workshop = newText },
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
                     label = { Text("Nombre del taller") },
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color(0xFF05A6E1),
@@ -100,37 +100,25 @@ fun InventoryDialog(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
+                            .padding(bottom = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = "Localizacion",
-                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp),
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Longitud: -99.123456",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        Text(
-                            text = "Latitud: 19.123456",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        Text(
-                            text = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal.",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center
+                        LocationInfo(
+                            location = LocationData(0.0, 0.0),
+                            address = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal."
                         )
                     }
                 }
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp, end = 8.dp, bottom = 8.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(

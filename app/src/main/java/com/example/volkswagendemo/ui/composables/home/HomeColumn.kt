@@ -36,13 +36,13 @@ fun HomeColumn(
         HomeCard(
             title = "Inventario",
             description = "Genera archivos de REPUVES",
-            icon = R.drawable.baseline_list,
+            icon = R.drawable.list,
             onClick = { homeViewModel.showWorkshopDialog = true }
         )
         HomeCard(
             title = "Busqueda",
             description = "Compara REPUVES con un archivo",
-            icon = R.drawable.manage_search,
+            icon = R.drawable.search,
             onClick = { navigateToSearch() }
         )
         HomeCard(

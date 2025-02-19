@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.LocationData
+import com.example.volkswagendemo.ui.states.LocationStates
 import com.example.volkswagendemo.utils.LocationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,49 +26,56 @@ class HomeViewModel @Inject constructor(
     private val _bottomSheetStatus = MutableStateFlow(false)
     var bottomSheetStatus: StateFlow<Boolean> = _bottomSheetStatus.asStateFlow()
 
-    private val _locationStatus = MutableStateFlow("Hide")
-    var locationStatus: StateFlow<String> = _locationStatus.asStateFlow()
+    private val _locationStatus = MutableStateFlow<LocationStates>(LocationStates.Hide)
+    val locationStatus: StateFlow<LocationStates> = _locationStatus.asStateFlow()
 
-    private val _location = MutableStateFlow<LocationData?>(null)
-    val location: StateFlow<LocationData?> = _location.asStateFlow()
+    private val _location = MutableStateFlow(LocationData(0.0,0.0))
+    val location: StateFlow<LocationData> = _location.asStateFlow()
     private val _address = MutableStateFlow("Ubicación no disponible")
     val address: StateFlow<String> = _address.asStateFlow()
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message.asStateFlow()
 
     fun showBottomSheet() {
-        _bottomSheetStatus.value = true
+        updateBottomSheetStatus(true)
     }
 
     fun hideBottomSheet() {
-        _bottomSheetStatus.value = false
+        updateBottomSheetStatus(false)
+    }
+
+    private fun updateBottomSheetStatus(status: Boolean) {
+        viewModelScope.launch {
+            _bottomSheetStatus.value = status
+            Log.d("updateBottomSheetStatus", "🔵 Status: $status")
+        }
     }
 
     fun showLocalizationDialog() {
-        updateLocationStatus("Loading")
+        updateLocationStatus(LocationStates.Loading)
         if (locationUtils.isInternetAvailable()) {
             viewModelScope.launch {
                 requestLocationUpdate()
             }
         } else {
             _message.value = "Por favor verifica tu conexion a internet"
-            updateLocationStatus("InternetError")
+            updateLocationStatus(LocationStates.InternetError)
         }
     }
 
     fun hideLocalizationDialog() {
-        updateLocationStatus("Hide")
-    }
-
-    private fun updateLocationStatus(status: String) {
-        viewModelScope.launch {
-            _locationStatus.value = status
-            Log.d("updateLocationStatus", "🔵 Status: $status")
-        }
+        updateLocationStatus(LocationStates.Hide)
     }
 
     fun hasLocationPermission(): Boolean {
         return locationUtils.hasLocationPermission()
+    }
+
+    private fun updateLocationStatus(status: LocationStates) {
+        viewModelScope.launch {
+            _locationStatus.value = status
+            Log.d("updateLocationStatus", "🔵 Status: $status")
+        }
     }
 
     private fun requestLocationUpdate() {
@@ -75,7 +83,7 @@ class HomeViewModel @Inject constructor(
             locationUtils.requestLocation()
                 .collect { newLocation: Pair<LocationData, String> ->
                     if (newLocation.first.latitude == 0.0 || newLocation.first.longitude == 0.0) {
-                        updateLocationStatus("Error")
+                        updateLocationStatus(LocationStates.Error)
                         _message.value = newLocation.second
                     } else {
                         _location.value = newLocation.first
@@ -88,7 +96,7 @@ class HomeViewModel @Inject constructor(
     private fun reverseGeocodeLocation(location: LocationData) {
         locationUtils.reverseGeocodeLocation(location) { result ->
             _address.value = result
-            updateLocationStatus("Show")
+            updateLocationStatus(LocationStates.Show)
         }
     }
 

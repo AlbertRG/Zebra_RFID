@@ -28,15 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.data.LocationData
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -59,7 +57,7 @@ fun FileDialog(
     ) {
         Card(
             modifier = Modifier
-                .width(320.dp),
+                .fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(Color.White)
         ) {
@@ -79,52 +77,16 @@ fun FileDialog(
                 Text(
                     text = fileName,
                     modifier = Modifier
-                        .padding(top = 16.dp),
+                        .padding(vertical = 16.dp),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 if (isLocationSave) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                                    append("Longitud: ")
-                                }
-                                append("-99.123456")
-                            },
-                            modifier = Modifier
-                                .padding(vertical = 4.dp),
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        Text(
-                            buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                                    append("Latitud: ")
-                                }
-                                append("19.123456")
-                            },
-                            modifier = Modifier
-                                .padding(vertical = 4.dp),
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        Text(
-                            text = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal.",
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
-                    }
+                    LocationInfo(
+                        location = LocationData(0.0, 0.0),
+                        address = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal."
+                    )
+                    HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
                 }
                 LazyColumn(
                     modifier = Modifier

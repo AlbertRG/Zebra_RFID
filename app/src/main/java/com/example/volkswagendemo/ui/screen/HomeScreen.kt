@@ -2,7 +2,6 @@ package com.example.volkswagendemo.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,23 +25,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.dialog.GeneralDialog
-import com.example.volkswagendemo.ui.composables.dialog.InventoryDialog
+import com.example.volkswagendemo.ui.composables.dialog.WorkshopDialog
+import com.example.volkswagendemo.ui.composables.dialog.LocationDialog
 import com.example.volkswagendemo.ui.composables.home.ButtonSheetItems
 import com.example.volkswagendemo.ui.composables.home.HomeColumn
 import com.example.volkswagendemo.ui.composables.home.HomeTopBar
+import com.example.volkswagendemo.ui.states.LocationStates
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
@@ -61,11 +53,6 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     val locationStatus by homeViewModel.locationStatus.collectAsState()
-    val location by homeViewModel.location.collectAsState()
-    val address by homeViewModel.address.collectAsState()
-    val message by homeViewModel.message.collectAsState()
-
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.connecting))
 
     Scaffold(
         topBar = {
@@ -155,74 +142,19 @@ fun HomeScreen(
                 navigateToSearch
             )
         }
-    }
-
-    if (locationStatus == "Loading") {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0x80000000)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LottieAnimation(
-                composition = composition,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp),
-                iterations = LottieConstants.IterateForever
-            )
-        }
-    }
-
-    when (locationStatus) {
-
-        "Show" -> {
-            GeneralDialog(
-                icon = R.drawable.location,
-                dialogTitle = "Localizacion",
-                dialogText = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Longitud: ")
-                    }
-                    append(location?.longitude.toString())
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Latitud: ")
-                    }
-                    append(location?.latitude.toString())
-                    append(address)
-                }.toString(),
-                onConfirmation = {
-                    homeViewModel.hideLocalizationDialog()
-                },
-                hasDismissButton = false,
-                onDismissRequest = {}
-            )
-        }
-
-        "Loading" -> {
-
-        }
-
-        "Error" -> {
-            GeneralDialog(
-                icon = R.drawable.error,
-                dialogTitle = "Error",
-                dialogText = message,
-                onConfirmation = {
-                    homeViewModel.hideLocalizationDialog()
-                },
-                hasDismissButton = false,
-                onDismissRequest = {}
-            )
-        }
 
     }
 
     if (homeViewModel.showWorkshopDialog) {
-        InventoryDialog(
+        WorkshopDialog(
             homeViewModel,
             navigateToInventory
+        )
+    }
+
+    if (locationStatus != LocationStates.Hide) {
+        LocationDialog(
+            homeViewModel
         )
     }
 
