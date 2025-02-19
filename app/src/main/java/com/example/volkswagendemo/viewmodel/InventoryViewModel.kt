@@ -439,19 +439,19 @@ class InventoryViewModel @Inject constructor(
 
     private fun readExcelFile(context: Context, fileName: String): List<String> {
         val vinsList = mutableListOf<String>()
-        val projection = arrayOf(MediaStore.Downloads._ID)
-        val selection = "${MediaStore.Downloads.DISPLAY_NAME} = ?"
+        val projection = arrayOf(MediaStore.Files.FileColumns._ID)
+        val selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} = ?"
         val selectionArgs = arrayOf(fileName)
 
         context.contentResolver.query(
-            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+            MediaStore.Files.getContentUri("external"),
             projection, selection, selectionArgs, null
         )?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val idColumn = cursor.getColumnIndex(MediaStore.Downloads._ID)
+                val idColumn = cursor.getColumnIndex(MediaStore.Files.FileColumns._ID)
                 val fileId = cursor.getLong(idColumn)
                 val fileUri =
-                    ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, fileId)
+                    ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), fileId)
 
                 runCatching {
                     context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
@@ -469,7 +469,7 @@ class InventoryViewModel @Inject constructor(
                         }
                     }
                 }.onFailure { e ->
-                    Log.e("Excel", "⚠️ Error al leer el archivo: ${e.message}")
+                    Log.e("Excel", "⚠️ Error reading file: ${e.message}")
                 }
             }
         }

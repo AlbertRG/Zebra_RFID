@@ -1,5 +1,6 @@
 package com.example.volkswagendemo.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,14 +25,15 @@ class HomeViewModel @Inject constructor(
     private val _bottomSheetStatus = MutableStateFlow(false)
     var bottomSheetStatus: StateFlow<Boolean> = _bottomSheetStatus.asStateFlow()
 
-    private val _localizationDialogStatus = MutableStateFlow(false)
-    var localizationDialogStatus: StateFlow<Boolean> = _localizationDialogStatus.asStateFlow()
+    private val _locationStatus = MutableStateFlow("Hide")
+    var locationStatus: StateFlow<String> = _locationStatus.asStateFlow()
 
     private val _location = MutableStateFlow<LocationData?>(null)
     val location: StateFlow<LocationData?> = _location.asStateFlow()
-
     private val _address = MutableStateFlow("Ubicación no disponible")
     val address: StateFlow<String> = _address.asStateFlow()
+    private val _message = MutableStateFlow("")
+    val message: StateFlow<String> = _message.asStateFlow()
 
     fun showBottomSheet() {
         _bottomSheetStatus.value = true
@@ -42,12 +44,26 @@ class HomeViewModel @Inject constructor(
     }
 
     fun showLocalizationDialog() {
-        requestLocationUpdate()
-        _localizationDialogStatus.value = true
+        updateLocationStatus("Loading")
+        if (locationUtils.isInternetAvailable()) {
+            viewModelScope.launch {
+                requestLocationUpdate()
+            }
+        } else {
+            _message.value = "Por favor verifica tu conexion a internet"
+            updateLocationStatus("InternetError")
+        }
     }
 
     fun hideLocalizationDialog() {
-        _localizationDialogStatus.value = false
+        updateLocationStatus("Hide")
+    }
+
+    private fun updateLocationStatus(status: String) {
+        viewModelScope.launch {
+            _locationStatus.value = status
+            Log.d("updateLocationStatus", "🔵 Status: $status")
+        }
     }
 
     fun hasLocationPermission(): Boolean {
@@ -56,10 +72,15 @@ class HomeViewModel @Inject constructor(
 
     private fun requestLocationUpdate() {
         viewModelScope.launch {
-            locationUtils.getLocationOnce()
-                .collect { newLocation ->
-                    _location.value = newLocation
-                    reverseGeocodeLocation(newLocation)
+            locationUtils.requestLocation()
+                .collect { newLocation: Pair<LocationData, String> ->
+                    if (newLocation.first.latitude == 0.0 || newLocation.first.longitude == 0.0) {
+                        updateLocationStatus("Error")
+                        _message.value = newLocation.second
+                    } else {
+                        _location.value = newLocation.first
+                        reverseGeocodeLocation(newLocation.first)
+                    }
                 }
         }
     }
@@ -67,6 +88,7 @@ class HomeViewModel @Inject constructor(
     private fun reverseGeocodeLocation(location: LocationData) {
         locationUtils.reverseGeocodeLocation(location) { result ->
             _address.value = result
+            updateLocationStatus("Show")
         }
     }
 

@@ -60,9 +60,8 @@ fun HomeColumn(
                         )
                     )
                 }
-
-
             }
         )
     }
+
 }
