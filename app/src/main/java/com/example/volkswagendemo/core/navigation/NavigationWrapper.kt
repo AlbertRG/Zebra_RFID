@@ -42,7 +42,8 @@ fun NavigationWrapper() {
         }
 
         composable<Search> {
-            SearchScreen {
+            val inventoryViewModel = hiltViewModel<InventoryViewModel>()
+            SearchScreen(inventoryViewModel) {
                 navController.navigate(Home) {
                     popUpTo<Home> { inclusive = true }
                 }

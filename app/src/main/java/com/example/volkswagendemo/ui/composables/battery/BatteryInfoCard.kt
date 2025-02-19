@@ -107,6 +107,9 @@ fun BatteryInfoCardPreview() {
     BatteryInfoCard(
         icon = R.drawable.battery,
         title = "Battery",
-        infoList = listOf("Title" to "value")
+        infoList = listOf(
+            "Title" to "value",
+            "Title" to "value",
+            "Title" to "value")
     )
 }
