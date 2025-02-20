@@ -4,6 +4,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.volkswagendemo.ui.states.BatteryUiState
+import com.example.volkswagendemo.ui.states.MutableBatteryUiState
 import com.zebra.rfid.api3.BatteryStatistics
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.InvalidUsageException
@@ -14,9 +16,6 @@ import com.zebra.rfid.api3.Readers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,31 +24,27 @@ class BatteryViewModel @Inject constructor(
     application: Application
 ) : ViewModel() {
 
-    private val _batteryStatus = MutableStateFlow("Connecting")
-    val batteryStatus: StateFlow<String> = _batteryStatus.asStateFlow()
+    private val _batteryUiState = MutableBatteryUiState()
+    val batteryUiState: BatteryUiState = _batteryUiState
 
     private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
     private var readerDevice: ReaderDevice? = null
     private var reader: RFIDReader? = null
     private var batteryStats = BatteryStatistics()
 
-    private val _batteryInfo = MutableStateFlow(List(7) { "0" })
-    val batteryInfo = _batteryInfo.asStateFlow()
-
     init {
         connectReader()
     }
 
     fun retryConnection() {
-        updateBatteryStatus("Connecting")
+        resetState()
         connectReader()
     }
 
-    private fun updateBatteryStatus(status: String) {
-        viewModelScope.launch {
-            _batteryStatus.value = status
-            Log.d("RFID_updateBatteryStatus", "🔵 Status: $status")
-        }
+    private fun resetState() {
+        _batteryUiState.isConnecting = true
+        _batteryUiState.isConnected = false
+        _batteryUiState.hasError = false
     }
 
     private fun connectReader() {
@@ -57,59 +52,55 @@ class BatteryViewModel @Inject constructor(
             runCatching {
                 var attempts = 0
                 var availableRFIDReaderList: List<ReaderDevice>? = null
-
                 while (attempts < 15) {
                     availableRFIDReaderList = readers.GetAvailableRFIDReaderList()
 
                     if (!availableRFIDReaderList.isNullOrEmpty()) {
-                        Log.i("RFID_connectReader", "✅ Lector encontrado en intento $attempts")
+                        Log.i("RFID_connectReader", "✅ Reader found in intent: $attempts")
                         break
                     }
 
                     Log.i(
                         "RFID_connectReader",
-                        "⏱️ No hay lectores disponibles, reintentando... ($attempts/15)"
+                        "⏱️ No readers available, retrying... ($attempts/15)"
                     )
                     attempts++
                     delay(1000)
                 }
 
                 if (availableRFIDReaderList.isNullOrEmpty()) {
-                    throw IllegalStateException("No se encontraron lectores disponibles")
+                    throw IllegalStateException("No available readers found")
                 }
 
                 readerDevice = availableRFIDReaderList[0]
                 reader = readerDevice?.rfidReader?.apply {
                     connect()
                     fetchBatteryStats(this)
-
                 }
 
             }.onFailure { exception ->
-                Log.e("RFID_connectReader", "⚠️ Error al conectar el lector RFID")
+                Log.e("RFID_connectReader", "⚠️ Error when connecting the RFID reader")
                 handleException(exception)
             }
         }
     }
 
     private fun fetchBatteryStats(reader: RFIDReader) {
-
         runCatching {
             batteryStats = reader.Config.batteryStats
-            updateBatteryStatus("Ready")
-        }.onFailure { e ->
-            handleException(e)
+            _batteryUiState.manufactureDate = batteryStats.manufactureDate
+            _batteryUiState.modelNumber = batteryStats.modelNumber
+            _batteryUiState.batteryId = batteryStats.batteryId
+            _batteryUiState.health = batteryStats.health
+            _batteryUiState.cycleCount = batteryStats.cycleCount
+            _batteryUiState.percentage = batteryStats.percentage
+            _batteryUiState.temperature = batteryStats.temperature
+            _batteryUiState.isConnecting = false
+            _batteryUiState.isConnected = true
+        }.onFailure { exception ->
+            Log.e("RFID_fetchBatteryStats", "⚠️ Error in obtaining battery information")
+            handleException(exception)
         }
-
-        _batteryInfo.value = listOf(
-            batteryStats.manufactureDate,
-            batteryStats.modelNumber,
-            batteryStats.batteryId,
-            "${batteryStats.health}%",
-            "${batteryStats.cycleCount}",
-            "${batteryStats.percentage}",
-            "${batteryStats.temperature}°C"
-        )
     }
 
     private fun handleException(exception: Throwable) {
@@ -120,7 +111,8 @@ class BatteryViewModel @Inject constructor(
             is NullPointerException -> "⚠️ Null pointer exception: ${exception.message}"
             else -> "⚠️ Unexpected error: ${exception.message}"
         }
-        updateBatteryStatus("Error")
+        _batteryUiState.isConnecting = false
+        _batteryUiState.hasError = true
         Log.e("RFID_handleException", message)
     }
 

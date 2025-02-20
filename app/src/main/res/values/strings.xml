@@ -2,6 +2,24 @@
     <string name="app_name">VolkswagenDemo</string>
 
     <!--LocationDialog-->
-    <string name="internet_error">Por favor verifica tu conexión a internet</string>">
+    <string name="internet_error">Por favor verifica tu conexión a internet</string>
+
+    <!--BatteryScreen-->
+    <string name="battery_title">Información de Batería</string>
+    <string name="general_details">Detalles Generales</string>
+    <string name="manufacturer_date">Fecha de manufactura</string>
+    <string name="model_number">Número de modelo</string>
+    <string name="battery_id">ID de batería</string>
+    <string name="health_metrics">Indicadores de Salud</string>"
+    <string name="health_status">Estado de salud</string>
+    <string name="cycle_count">Ciclos de carga consumidos</string>
+    <string name="temperature">Temperatura de funcionamiento</string>
+    <string name="current">Actual</string>
+    <string name="percentage_symbol">%</string>
+
+    <!--ErrorConnection-->
+    <string name="error_title">¡Opss! Ocurrió un error</string>
+    <string name="error_connecting">Verifica la conexión con la handheld</string>
+    <string name="retry">Reintentar</string>
 
 </resources>

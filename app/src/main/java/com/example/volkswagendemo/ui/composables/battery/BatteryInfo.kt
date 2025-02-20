@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,39 +26,37 @@ import com.example.volkswagendemo.viewmodel.BatteryViewModel
 fun BatteryInfo(
     batteryViewModel: BatteryViewModel
 ) {
-
-    val batteryInfo by batteryViewModel.batteryInfo.collectAsState()
-
+    val batteryUiState = batteryViewModel.batteryUiState
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
             .padding(16.dp)
     ) {
-        BatteryPercentage(batteryInfo[5].toInt())
+        BatteryPercentage(batteryUiState.percentage)
         Spacer(modifier = Modifier.height(16.dp))
         BatteryInfoCard(
             icon = R.drawable.battery_profile,
-            title = "Detalles Generales",
+            title = stringResource(R.string.general_details),
             infoList = listOf(
-                "Fecha de manufactura" to batteryInfo[0],
-                "Número de modelo" to batteryInfo[1],
-                "ID de batería" to batteryInfo[2]
+                stringResource(R.string.manufacturer_date) to batteryUiState.manufactureDate,
+                stringResource(R.string.model_number) to batteryUiState.modelNumber,
+                stringResource(R.string.battery_id) to batteryUiState.batteryId
             )
         )
         BatteryInfoCard(
             icon = R.drawable.health_metrics,
-            title = "Indicadores de Salud",
+            title = stringResource(R.string.health_metrics),
             infoList = listOf(
-                "Estado de salud" to batteryInfo[3],
-                "Ciclos de carga consumidos" to batteryInfo[4]
+                stringResource(R.string.health_status) to batteryUiState.health.toString(),
+                stringResource(R.string.cycle_count) to batteryUiState.cycleCount.toString()
             )
         )
         BatteryInfoCard(
             icon = R.drawable.thermostat,
-            title = "Temperatura de Funcionamiento",
+            title = stringResource(R.string.temperature),
             infoList = listOf(
-                "Actual" to batteryInfo[6]
+                stringResource(R.string.current) to batteryUiState.temperature.toString()
             )
         )
     }
@@ -73,15 +71,15 @@ fun BatteryPercentage(
     ) {
         Text(
             text = percentage.toString(),
-            color = Color(0xFF05A6E1),
+            color = colorResource(R.color.primary_blue),
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "%",
+            text = stringResource(R.string.percentage_symbol),
             modifier = Modifier
                 .padding(bottom = 4.dp),
-            color = Color(0xFF05A6E1),
+            color = colorResource(R.color.primary_blue),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -91,7 +89,7 @@ fun BatteryPercentage(
         modifier = Modifier
             .fillMaxWidth()
             .height(8.dp),
-        color = Color(0xFF05A6E1),
+        color = colorResource(R.color.primary_blue),
         trackColor = Color.LightGray,
         gapSize = (-5).dp
     )

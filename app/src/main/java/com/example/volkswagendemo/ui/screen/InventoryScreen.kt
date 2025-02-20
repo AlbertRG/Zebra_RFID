@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.Background
 import com.example.volkswagendemo.ui.composables.dialog.FileDialog
 import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
 import com.example.volkswagendemo.ui.composables.inventory.InventoryError
@@ -81,17 +82,7 @@ fun InventoryScreen(
                 .background(color = Color.White)
         ) {
             HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
-            Image(
-                painter = painterResource(
-                    id = R.drawable.volkswagen_logo
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.08f),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.None
-            )
+            Background()
             Box(
                 modifier = Modifier
                     .fillMaxSize(),

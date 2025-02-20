@@ -31,16 +31,21 @@ class LocationViewModel @Inject constructor(
     }
 
     fun initLocation() {
+        resetState()
         _locationUiState.isLoading = true
-        _locationUiState.hasError = false
         if (locationUtils.isInternetAvailable()) {
             viewModelScope.launch {
-                _locationUiState.isInternetError = false
                 requestLocationUpdate()
             }
         } else {
             _locationUiState.isInternetError = true
         }
+    }
+
+    private fun resetState() {
+        _locationUiState.isLoading = false
+        _locationUiState.hasError = false
+        _locationUiState.isInternetError = false
     }
 
     private fun requestLocationUpdate() {

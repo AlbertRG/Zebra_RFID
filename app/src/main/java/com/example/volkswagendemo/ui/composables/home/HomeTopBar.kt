@@ -32,7 +32,7 @@ fun HomeTopBar(
         ),
         title = {
             Text(
-                text = "Volkswagen",
+                text = "Inventario REPUVE",
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -42,13 +42,13 @@ fun HomeTopBar(
             IconButton(
                 onClick = { }
             ) {
-                Image(
+                /*Image(
                     painter = painterResource(R.drawable.volkswagen_logo),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     alignment = Alignment.Center,
                     contentScale = ContentScale.Fit
-                )
+                )*/
             }
         },
         actions = {

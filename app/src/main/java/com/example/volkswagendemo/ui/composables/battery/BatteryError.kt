@@ -17,6 +17,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,9 +32,7 @@ import com.example.volkswagendemo.viewmodel.BatteryViewModel
 fun BatteryError(
     batteryViewModel: BatteryViewModel
 ) {
-
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,13 +50,13 @@ fun BatteryError(
                 .height(16.dp)
         )
         Text(
-            text = "Opss! Ocurrio un error",
+            text = stringResource(R.string.error_title),
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "Verifica la conexion con la handheld",
+            text = stringResource(R.string.error_connecting),
             modifier = Modifier
                 .padding(top = 8.dp),
             color = Color.Gray,
@@ -67,10 +67,10 @@ fun BatteryError(
             modifier = Modifier
                 .width(240.dp)
                 .padding(vertical = 24.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFF05A6E1))
+            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_blue))
         ) {
             Text(
-                text = "Reintentar"
+                text = stringResource(R.string.retry)
             )
         }
     }

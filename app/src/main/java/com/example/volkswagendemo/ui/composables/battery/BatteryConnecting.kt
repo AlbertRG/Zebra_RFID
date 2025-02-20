@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -22,9 +21,7 @@ import com.example.volkswagendemo.R
 
 @Composable
 fun BatteryConnecting() {
-
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.battery))
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,10 +39,4 @@ fun BatteryConnecting() {
         )
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BatteryConnectingPreview() {
-    BatteryConnecting()
 }
