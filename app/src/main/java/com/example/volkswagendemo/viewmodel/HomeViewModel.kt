@@ -5,15 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.ui.states.HomeUiState
 import com.example.volkswagendemo.ui.states.MutableHomeUiState
-import com.example.volkswagendemo.utils.LocationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val locationUtils: LocationUtils
-) : ViewModel() {
+class HomeViewModel @Inject constructor() : ViewModel() {
 
     private val _homeUiState = MutableHomeUiState()
     val homeUiStates: HomeUiState = _homeUiState
