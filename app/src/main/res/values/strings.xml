@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">VolkswagenDemo</string>
+
+    <!--LocationDialog-->
+    <string name="internet_error">Por favor verifica tu conexión a internet</string>">
+
 </resources>

@@ -10,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.HomeViewModel
+import com.example.volkswagendemo.viewmodel.LocationViewModel
 
 @Composable
 fun HomeColumn(
     homeViewModel: HomeViewModel,
+    locationViewModel: LocationViewModel,
     navigateToSearch: () -> Unit
 ) {
 
@@ -23,7 +25,7 @@ fun HomeColumn(
             if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true &&
                 permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
             ) {
-                homeViewModel.showLocalizationDialog()
+                locationViewModel.initLocation()
             }
         }
     )
@@ -37,7 +39,7 @@ fun HomeColumn(
             title = "Inventario",
             description = "Genera archivos de REPUVES",
             icon = R.drawable.list,
-            onClick = { homeViewModel.showWorkshopDialog = true }
+            onClick = { homeViewModel.setWorkshopShowing(true) }
         )
         HomeCard(
             title = "Busqueda",
@@ -50,8 +52,9 @@ fun HomeColumn(
             description = "Actualiza tu localizacion",
             icon = R.drawable.location,
             onClick = {
-                if (homeViewModel.hasLocationPermission()) {
-                    homeViewModel.showLocalizationDialog()
+                if (locationViewModel.hasLocationPermission()) {
+                    locationViewModel.setLocationShowing(true)
+                    locationViewModel.initLocation()
                 } else {
                     requestLocationPermissionLauncher.launch(
                         arrayOf(

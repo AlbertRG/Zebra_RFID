@@ -13,6 +13,7 @@ import com.example.volkswagendemo.ui.screen.SettingsScreen
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
+import com.example.volkswagendemo.viewmodel.LocationViewModel
 
 @Composable
 fun NavigationWrapper() {
@@ -23,8 +24,10 @@ fun NavigationWrapper() {
 
         composable<Home> {
             val homeViewModel = hiltViewModel<HomeViewModel>()
+            val locationViewModel = hiltViewModel<LocationViewModel>()
             HomeScreen(
                 homeViewModel,
+                locationViewModel,
                 { navController.navigate(Inventory) },
                 { navController.navigate(Search) },
                 { navController.navigate(Battery) },

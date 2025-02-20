@@ -14,12 +14,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,26 +31,43 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.states.LocationStates
-import com.example.volkswagendemo.viewmodel.HomeViewModel
+import com.example.volkswagendemo.viewmodel.LocationViewModel
 
 @Composable
 fun LocationDialog(
-    homeViewModel: HomeViewModel
+    locationViewModel: LocationViewModel
 ) {
 
-    val locationStatus by homeViewModel.locationStatus.collectAsState()
-    val location by homeViewModel.location.collectAsState()
-    val address by homeViewModel.address.collectAsState()
-    val message by homeViewModel.message.collectAsState()
-
+    val locationUiState = locationViewModel.locationUiState
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.connecting))
 
-    when (locationStatus) {
+    when {
 
-        in listOf(LocationStates.Show, LocationStates.Loading) -> {
+        locationUiState.isInternetError -> {
+            GeneralDialog(
+                icon = R.drawable.wifi_error,
+                dialogTitle = "Sin conexión",
+                dialogText = stringResource(R.string.internet_error),
+                onConfirmation = { locationViewModel.setLocationShowing(false) },
+                hasDismissButton = false,
+                onDismissRequest = { }
+            )
+        }
+
+        locationUiState.hasError -> {
+            GeneralDialog(
+                icon = R.drawable.error,
+                dialogTitle = "Error",
+                dialogText = locationUiState.message,
+                onConfirmation = { locationViewModel.setLocationShowing(false) },
+                hasDismissButton = false,
+                onDismissRequest = { }
+            )
+        }
+
+        else -> {
             Dialog(
-                onDismissRequest = { homeViewModel.hideLocalizationDialog() },
+                onDismissRequest = { locationViewModel.setLocationShowing(false) },
                 properties = DialogProperties(
                     dismissOnBackPress = false,
                     dismissOnClickOutside = false
@@ -84,11 +101,10 @@ fun LocationDialog(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
-                        if (locationStatus != LocationStates.Loading) {
-
+                        if (!locationUiState.isLoading) {
                             LocationInfo(
-                                location = location,
-                                address = address
+                                location = locationUiState.location,
+                                address = locationUiState.address
                             )
                             Row(
                                 modifier = Modifier
@@ -96,7 +112,7 @@ fun LocationDialog(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 TextButton(
-                                    onClick = { homeViewModel.hideLocalizationDialog() }
+                                    onClick = { locationViewModel.setLocationShowing(false) }
                                 ) {
                                     Text(
                                         text = "Aceptar",
@@ -123,30 +139,5 @@ fun LocationDialog(
                 }
             }
         }
-
-        is LocationStates.Error -> {
-            GeneralDialog(
-                icon = R.drawable.error,
-                dialogTitle = "Error",
-                dialogText = message,
-                onConfirmation = { homeViewModel.hideLocalizationDialog() },
-                hasDismissButton = false,
-                onDismissRequest = { }
-            )
-        }
-
-        is LocationStates.InternetError -> {
-            GeneralDialog(
-                icon = R.drawable.wifi_error,
-                dialogTitle = "Sin conexión",
-                dialogText = message,
-                onConfirmation = { homeViewModel.hideLocalizationDialog() },
-                hasDismissButton = false,
-                onDismissRequest = { }
-            )
-        }
-
-        else -> { }
-
     }
 }

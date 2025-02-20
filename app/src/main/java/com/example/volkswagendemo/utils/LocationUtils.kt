@@ -52,7 +52,7 @@ class LocationUtils @Inject constructor(private val context: Context) {
         val timeoutHandler = Handler(Looper.getMainLooper())
         val timeoutRunnable = Runnable {
             Log.e("LocationUtils", "⚠️ Timeout: No location received")
-            trySend(Pair(LocationData(0.0, 0.0), "Timeout: No location received"))
+            trySend(Pair(LocationData(0.0, 0.0), "Tiempo agotado: Localización no recibida"))
             close()
         }
 

@@ -41,7 +41,7 @@ fun WorkshopDialog(
 
     var openDialog by remember { mutableStateOf(true) }
     var workshop by remember { mutableStateOf("") }
-    val isLocationSave by remember { mutableStateOf(true) }
+    val isLocationSave by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = { openDialog = false },
@@ -123,7 +123,7 @@ fun WorkshopDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            homeViewModel.showWorkshopDialog = false
+                            homeViewModel.setWorkshopShowing(false)
                         }
                     ) {
                         Text(
@@ -134,7 +134,7 @@ fun WorkshopDialog(
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(
                         onClick = {
-                            homeViewModel.showWorkshopDialog = false
+                            homeViewModel.setWorkshopShowing(false)
                             navigateToInventory()
                         }) {
                         Text(
