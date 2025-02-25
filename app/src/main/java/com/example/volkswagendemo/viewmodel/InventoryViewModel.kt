@@ -206,7 +206,7 @@ class InventoryViewModel @Inject constructor(
 
     private fun configureReader(reader: RFIDReader) {
         runCatching {
-            setupAntennaConfig(reader)
+            //setupAntennaConfig(reader)
             setupTriggerConfig(reader)
             setupEventConfig(reader)
         }.onSuccess {
@@ -365,7 +365,8 @@ class InventoryViewModel @Inject constructor(
         }
 
         tagsFlow.forEachIndexed { index, tag ->
-            sheet.createRow(index + 4).createCell(0).setCellValue(tag.vin)
+            sheet.createRow(index + 4).createCell(0).setCellValue(tag.repuve)
+            sheet.createRow(index + 4).createCell(1).setCellValue(tag.vin)
         }
 
         val contentValues = ContentValues().apply {
