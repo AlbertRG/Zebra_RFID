@@ -71,7 +71,7 @@ fun BatteryPercentage(
     ) {
         Text(
             text = percentage.toString(),
-            color = colorResource(R.color.primary_blue),
+            color = colorResource(R.color.primary_red),
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold
         )
@@ -79,7 +79,7 @@ fun BatteryPercentage(
             text = stringResource(R.string.percentage_symbol),
             modifier = Modifier
                 .padding(bottom = 4.dp),
-            color = colorResource(R.color.primary_blue),
+            color = colorResource(R.color.primary_red),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -89,7 +89,7 @@ fun BatteryPercentage(
         modifier = Modifier
             .fillMaxWidth()
             .height(8.dp),
-        color = colorResource(R.color.primary_blue),
+        color = colorResource(R.color.primary_red),
         trackColor = Color.LightGray,
         gapSize = (-5).dp
     )

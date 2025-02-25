@@ -32,7 +32,7 @@ fun HomeTopBar(
         ),
         title = {
             Text(
-                text = "Inventario REPUVE",
+                text = "Altatec RFID",
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -42,13 +42,13 @@ fun HomeTopBar(
             IconButton(
                 onClick = { }
             ) {
-                /*Image(
-                    painter = painterResource(R.drawable.volkswagen_logo),
+                Image(
+                    painter = painterResource(R.drawable.altatec_logo),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     alignment = Alignment.Center,
                     contentScale = ContentScale.Fit
-                )*/
+                )
             }
         },
         actions = {

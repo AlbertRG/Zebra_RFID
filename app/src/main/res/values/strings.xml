@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VolkswagenDemo</string>
+    <string name="app_name">RFID Altatec</string>
 
     <!--LocationDialog-->
     <string name="internet_error">Por favor verifica tu conexión a internet</string>

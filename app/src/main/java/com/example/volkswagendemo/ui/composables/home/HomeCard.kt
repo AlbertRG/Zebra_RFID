@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,7 +57,7 @@ fun HomeCard(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(48.dp)
-                    .background(color = Color(0xFF05A6E1), shape = CircleShape)
+                    .background(color = colorResource(R.color.primary_red), shape = CircleShape)
             ) {
                 Icon(
                     painter = painterResource(id = icon),

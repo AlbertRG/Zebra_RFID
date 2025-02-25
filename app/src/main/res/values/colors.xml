@@ -8,5 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="divider">#FFF0F0F0</color>
-    <color name="primary_blue">#FF05A6E1</color>"
+    <color name="primary_blue">#FF05A6E1</color>
+    <color name="primary_red">#FFEF0A2A</color>
+    <color name="secondary_red">#25EF0A2A</color>
+    <color name="fake_red">#FFC8102E</color>
+    <color name="secondary_fake_red">#25C8102E</color>
 </resources>

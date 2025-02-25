@@ -25,11 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.volkswagendemo.R
 import com.example.volkswagendemo.data.LocationData
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 
@@ -67,7 +69,7 @@ fun WorkshopDialog(
                     imageVector = Icons.Filled.Search,
                     contentDescription = null,
                     modifier = Modifier.padding(8.dp),
-                    tint = Color(0xFF05A6E1)
+                    tint = colorResource(R.color.primary_red)
                 )
                 Text(
                     text = "Localizacion del taller",
@@ -89,11 +91,11 @@ fun WorkshopDialog(
                         .padding(bottom = 16.dp),
                     label = { Text("Nombre del taller") },
                     colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color(0xFF05A6E1),
+                        focusedIndicatorColor = colorResource(R.color.primary_red),
                         unfocusedIndicatorColor = Color(0xFF6D7679),
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        focusedLabelColor = Color(0xFF05A6E1)
+                        focusedLabelColor = colorResource(R.color.primary_red)
                     )
                 )
                 if (isLocationSave) {
@@ -142,7 +144,7 @@ fun WorkshopDialog(
                             color = if (workshop.none()) {
                                 Color.Gray
                             } else {
-                                Color(0xFF05A6E1)
+                                Color.Black
                             }
                         )
                     }

@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.volkswagendemo.R
 
 @Composable
 fun InventoryBottomBar(
@@ -47,11 +49,11 @@ fun InventoryBottomBar(
                             vertical = 16.dp,
                             horizontal = 8.dp
                         ),
-                    colors = ButtonDefaults.buttonColors(Color(0x2505A6E1))
+                    colors = ButtonDefaults.buttonColors(colorResource(R.color.secondary_red))
                 ) {
                     Text(
                         text = title2,
-                        color = Color(0xFF05A6E1)
+                        color = colorResource(R.color.primary_red)
                     )
                 }
             }
@@ -63,7 +65,7 @@ fun InventoryBottomBar(
                         vertical = 16.dp,
                         horizontal = 8.dp
                     ),
-                colors = ButtonDefaults.buttonColors(Color(0xFF05A6E1))
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_red))
             ) {
                 Text(
                     text = title

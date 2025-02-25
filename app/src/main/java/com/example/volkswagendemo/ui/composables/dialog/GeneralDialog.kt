@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +37,7 @@ fun GeneralDialog(
             ) {
                 Text(
                     text = confirmButtonText,
-                    color = Color(0xFF05A6E1)
+                    color = colorResource(R.color.primary_red)
                 )
             }
         },
@@ -58,7 +59,7 @@ fun GeneralDialog(
             Icon(
                 painter = painterResource(icon),
                 contentDescription = iconDescription,
-                tint = Color(0xFF05A6E1)
+                tint = colorResource(R.color.primary_red)
             )
         },
         title = {
