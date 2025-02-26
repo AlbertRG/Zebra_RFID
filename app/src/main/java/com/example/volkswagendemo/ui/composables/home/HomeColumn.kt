@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.LocationViewModel
@@ -39,13 +40,17 @@ fun HomeColumn(
             title = "Inventario",
             description = "Genera archivos de REPUVES",
             icon = R.drawable.list,
-            onClick = { homeViewModel.setWorkshopShowing(true) }
+            onClick = { homeViewModel.setWorkshopShowing(true) },
+            iconColor = colorResource(R.color.tertiary_grey),
+            fillColor = colorResource(R.color.primary_red)
         )
         HomeCard(
             title = "Busqueda",
             description = "Compara REPUVES con un archivo",
             icon = R.drawable.search,
-            onClick = { navigateToSearch() }
+            onClick = { navigateToSearch() },
+            iconColor = colorResource(R.color.primary_red),
+            fillColor = colorResource(R.color.tertiary_grey)
         )
         HomeCard(
             title = "Localizacion",
@@ -63,7 +68,9 @@ fun HomeColumn(
                         )
                     )
                 }
-            }
+            },
+            iconColor = colorResource(R.color.tertiary_grey),
+            fillColor = colorResource(R.color.primary_red)
         )
     }
 

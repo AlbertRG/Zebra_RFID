@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.Background
 import com.example.volkswagendemo.ui.composables.dialog.WorkshopDialog
 import com.example.volkswagendemo.ui.composables.dialog.LocationDialog
@@ -60,7 +62,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(color = Color.White)
         ) {
-            HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+            HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
             Background()
             HomeColumn(
                 homeViewModel,

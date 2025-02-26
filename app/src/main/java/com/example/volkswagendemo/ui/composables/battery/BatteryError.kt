@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
@@ -43,7 +44,9 @@ fun BatteryError(
         LottieAnimation(
             composition = composition,
             modifier = Modifier
-                .size(240.dp)
+                .size(240.dp),
+            speed = 0.5f,
+            iterations = LottieConstants.IterateForever
         )
         Spacer(
             modifier = Modifier
@@ -67,7 +70,7 @@ fun BatteryError(
             modifier = Modifier
                 .width(240.dp)
                 .padding(vertical = 24.dp),
-            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_blue))
+            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_red))
         ) {
             Text(
                 text = stringResource(R.string.retry)

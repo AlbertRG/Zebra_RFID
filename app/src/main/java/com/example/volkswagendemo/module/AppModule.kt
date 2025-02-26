@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.module
 
 import android.app.Application
+import com.example.volkswagendemo.utils.HexToAscii
 import com.example.volkswagendemo.utils.LocationUtils
 import dagger.Module
 import dagger.Provides
@@ -16,6 +17,12 @@ object AppModule {
     @Singleton
     fun provideLocationUtils(application: Application): LocationUtils {
         return LocationUtils(application)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHexToAscii(): HexToAscii {
+        return HexToAscii()
     }
 
 }

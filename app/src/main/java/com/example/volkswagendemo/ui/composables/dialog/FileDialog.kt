@@ -87,7 +87,7 @@ fun FileDialog(
                         location = LocationData(0.0, 0.0),
                         address = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal."
                     )
-                    HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+                    HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
                 }
                 LazyColumn(
                     modifier = Modifier

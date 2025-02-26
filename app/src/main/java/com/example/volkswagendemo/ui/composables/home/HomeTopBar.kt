@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,7 +46,7 @@ fun HomeTopBar(
                 Image(
                     painter = painterResource(R.drawable.altatec_logo),
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(40.dp),
                     alignment = Alignment.Center,
                     contentScale = ContentScale.Fit
                 )
@@ -58,7 +59,7 @@ fun HomeTopBar(
                 Icon(
                     painter = painterResource(R.drawable.menu),
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = colorResource(R.color.primary_red)
                 )
             }
         }

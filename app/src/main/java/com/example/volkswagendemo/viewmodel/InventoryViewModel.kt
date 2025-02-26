@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.TagData
+import com.example.volkswagendemo.utils.HexToAscii
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
@@ -42,7 +43,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val hexToAscii: HexToAscii
 ) : ViewModel() {
 
     private val context = application.applicationContext
@@ -75,7 +77,7 @@ class InventoryViewModel @Inject constructor(
     }
 
     fun startInventory() {
-        if (_inventoryStatus.value != "Reading") {
+        if (_inventoryStatus.value != "Reading" && _inventoryStatus.value != "Resume") {
             try {
                 inventoryPerform()
             } catch (e: Exception) {
@@ -92,9 +94,9 @@ class InventoryViewModel @Inject constructor(
         // 128 BITS 32 CHARS - 256 BITS 64 CHARS
         val readAccessParams = tagAccess.ReadAccessParams().apply {
             accessPassword = 0
-            count = 8 //8 NIBBLES 32 CHARS - 9 NIBBLES 36 CHARS
+            count = 9 //8 NIBBLES 32 CHARS - 9 NIBBLES 36 CHARS
             memoryBank = MEMORY_BANK.MEMORY_BANK_USER
-            offset = 0 //0 NIBBLES - 4 NIBBLES 16 CHARS
+            offset = 4 //0 NIBBLES - 4 NIBBLES 16 CHARS
         }
 
         updateInventoryStatus("Reading")
@@ -114,8 +116,8 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun inventoryStop() {
-        reader?.Actions?.TagAccess?.stopAccess()
         updateInventoryStatus("Stopped")
+        reader?.Actions?.TagAccess?.stopAccess()
     }
 
     fun finishInventory() {
@@ -171,24 +173,24 @@ class InventoryViewModel @Inject constructor(
                 var attempts = 0
                 var availableRFIDReaderList: List<ReaderDevice>? = null
 
-                while (attempts < 15) {
+                while (attempts < 10) {
                     availableRFIDReaderList = readers.GetAvailableRFIDReaderList()
 
                     if (!availableRFIDReaderList.isNullOrEmpty()) {
-                        Log.i("RFID_connectReader", "✅ Lector encontrado en intento $attempts")
+                        Log.i("RFID_connectReader", "✅ Reader found in intent $attempts")
                         break
                     }
 
                     Log.i(
                         "RFID_connectReader",
-                        "⏱️ No hay lectores disponibles, reintentando... ($attempts/15)"
+                        "⏱️ No readers available, retrying... ($attempts/10)"
                     )
                     attempts++
                     delay(1000)
                 }
 
                 if (availableRFIDReaderList.isNullOrEmpty()) {
-                    throw IllegalStateException("No se encontraron lectores disponibles")
+                    throw IllegalStateException("No available readers found")
                 }
 
                 readerDevice = availableRFIDReaderList[0]
@@ -198,7 +200,7 @@ class InventoryViewModel @Inject constructor(
                 }
 
             }.onFailure { exception ->
-                Log.e("RFID_connectReader", "⚠️ Error al conectar el lector RFID")
+                Log.e("RFID_connectReader", "⚠️ Error when connecting the RFID reader")
                 handleException(exception)
             }
         }
@@ -281,11 +283,19 @@ class InventoryViewModel @Inject constructor(
 
                 if (_tagDataList.none { it.controlData == tag.memoryBankData }) {
 
+                    val repuve = hexToAscii.convert(tag.tagID.take(16))
+                    val vin = hexToAscii.convert(tag.memoryBankData.take(34))
                     val rawMemoryData = tag.memoryBankData
-                    val repuve = hexToAscii(tag.tagID).take(8)
-                    val vin = hexToAscii(tag.memoryBankData).take(16)
 
-                    if (repuve.all { it.isDigit() }) {
+                    if (repuve == null || vin == null) {
+                        Log.e(
+                            "RFID_eventReadNotify",
+                            "⚠️ Error: conversion failed (repuve=$repuve, vin=$vin), ignoring this tag"
+                        )
+                        return@forEach
+                    }
+
+                    if (repuve.all { it.isDigit() } && vin.all { it.isLetterOrDigit() }) {
                         val tagData =
                             TagData(
                                 repuve = repuve,
@@ -298,8 +308,12 @@ class InventoryViewModel @Inject constructor(
                         )
                         _tagDataList.add(tagData)
                         _tagsFlow.value = _tagDataList.toList().distinctBy { it.repuve }.reversed()
+                    } else {
+                        Log.e(
+                            "RFID_eventReadNotify",
+                            "⚠️ Invalid tag ignored (repuve=$repuve, vin=$vin)"
+                        )
                     }
-
                 }
             }
         }
@@ -317,7 +331,7 @@ class InventoryViewModel @Inject constructor(
                     when (handheldEvent) {
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED -> {
                             try {
-                                inventoryPerform()
+                                startInventory()
                             } catch (e: Exception) {
                                 Log.e(
                                     "RFID_eventStatusNotify",
@@ -347,26 +361,26 @@ class InventoryViewModel @Inject constructor(
 
     }
 
-    private fun hexToAscii(hex: String): String {
-        return hex.chunked(2).mapNotNull { it.toIntOrNull(16)?.toChar() }.joinToString("")
-    }
-
     private fun getActualDate(): String =
         SimpleDateFormat("yyyy-MM-dd HH-mm-ss", Locale.getDefault()).format(Date())
 
     private fun writeExcelFile(context: Context, tagsFlow: List<TagData>, workshop: String) {
         val timestamp = getActualDate()
-        val fileName = "$workshop $timestamp catalogoln.xls"
+        val fileName = "$workshop $timestamp.xls"
         val workbook = HSSFWorkbook()
         val sheet = workbook.createSheet("Hoja de datos")
 
-        listOf("Localization", timestamp, "Chasises").forEachIndexed { index, text ->
-            sheet.createRow(index + 1).createCell(0).setCellValue(text)
-        }
+        sheet.createRow(0).createCell(0).setCellValue("RFID ALTATEC")
+        sheet.createRow(1).createCell(0).setCellValue(timestamp)
+
+        val headerRow = sheet.createRow(2)
+        headerRow.createCell(0).setCellValue("REPUVE")
+        headerRow.createCell(1).setCellValue("VIN")
 
         tagsFlow.forEachIndexed { index, tag ->
-            sheet.createRow(index + 4).createCell(0).setCellValue(tag.repuve)
-            sheet.createRow(index + 4).createCell(1).setCellValue(tag.vin)
+            val row = sheet.createRow(index + 3)
+            row.createCell(0).setCellValue(tag.repuve)
+            row.createCell(1).setCellValue(tag.vin)
         }
 
         val contentValues = ContentValues().apply {

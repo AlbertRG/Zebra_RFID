@@ -1,13 +1,49 @@
 package com.example.volkswagendemo.ui.composables.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.volkswagendemo.R
 
 @Composable
 fun Settings() {
@@ -17,6 +53,159 @@ fun Settings() {
             .background(Color.Transparent)
             .padding(16.dp)
     ) {
-
+        SettingItem(
+            icon = R.drawable.antenna,
+            title = "Poder de la Antena"
+        ) { PowerSlider() }
+        SettingItem(
+            icon = R.drawable.volume_high,
+            title = "Volumen"
+        ) { VolumeSelector() }
+        SettingItem(
+            icon = R.drawable.settings,
+            title = "Perfil de Union"
+        ) { LinkProfileOptions() }
     }
+}
+
+@Composable
+fun SettingItem(
+    icon: Int,
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Row {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = title,
+
+                    tint = colorResource(R.color.primary_red)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+fun PowerSlider() {
+    var sliderPosition by remember { mutableFloatStateOf(0.5f) }
+    Slider(
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it },
+        modifier = Modifier
+            .padding(vertical = 4.dp),
+        colors = SliderDefaults.colors(
+            thumbColor = colorResource(R.color.primary_red),
+            activeTrackColor = colorResource(R.color.primary_red),
+            inactiveTrackColor = colorResource(R.color.secondary_red)
+        )
+    )
+}
+
+@Composable
+fun VolumeSelector() {
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    val options = listOf("Silencio", "Bajo", "Alto")
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        options.forEachIndexed { index, label ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = options.size
+                ),
+                onClick = { selectedIndex = index },
+                selected = index == selectedIndex,
+                label = { Text(label) },
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = colorResource(R.color.primary_red),
+                    activeContentColor = colorResource(R.color.white),
+                    inactiveContainerColor = colorResource(R.color.secondary_red),
+                    inactiveContentColor = colorResource(R.color.primary_red)
+                ),
+                border = SegmentedButtonDefaults.borderStroke(color = Color.Transparent)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LinkProfileOptions() {
+    var text by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf("Opción 1", "Opción 2", "Opción 3")
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            readOnly = true,
+            label = { Text("Selecciona una opción") },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Expandir",
+                    tint = colorResource(R.color.primary_red)
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = colorResource(R.color.primary_red),
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedLabelColor = colorResource(R.color.primary_red)
+            )
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        text = option
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsPreview() {
+    Settings()
 }

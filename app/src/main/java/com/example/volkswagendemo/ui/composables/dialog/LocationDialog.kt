@@ -40,7 +40,7 @@ fun LocationDialog(
 ) {
 
     val locationUiState = locationViewModel.locationUiState
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.connecting))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
 
     when {
 

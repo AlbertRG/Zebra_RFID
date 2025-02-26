@@ -33,7 +33,7 @@ fun InventoryBottomBar(
             .fillMaxWidth()
             .background(Color.White)
     ) {
-        HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+        HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
         Row(
             modifier = Modifier
                 .padding(horizontal = 8.dp),

@@ -44,7 +44,7 @@ fun BatteryScreen(
         ) {
             HorizontalDivider(
                 thickness = 1.dp,
-                color = colorResource(R.color.divider)
+                color = colorResource(R.color.tertiary_grey)
             )
             Background()
             Box(

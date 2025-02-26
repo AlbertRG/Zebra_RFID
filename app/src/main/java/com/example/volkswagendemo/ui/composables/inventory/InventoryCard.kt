@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.volkswagendemo.R
 
 @Composable
 fun InventoryCard(
@@ -24,13 +26,13 @@ fun InventoryCard(
     vin: String,
 ) {
     Card(
+        elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x40AEE3F6)
-        ),
-        border = BorderStroke(1.dp, Color(0xFFB8D5E0))
+            containerColor = Color.White
+        )
     ) {
         Row(
             modifier = Modifier

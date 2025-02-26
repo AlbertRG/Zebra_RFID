@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
@@ -47,7 +48,7 @@ fun InventoryScreen(
                 title = "Inventario",
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
-                    when (rfidStatus) {
+                    /*when (rfidStatus) {
 
                         "Stopped" ->
                             IconButton(
@@ -69,7 +70,7 @@ fun InventoryScreen(
                                     contentDescription = null
                                 )
                             }
-                    }
+                    }*/
                 }
             )
         }) { innerPadding ->
@@ -79,7 +80,7 @@ fun InventoryScreen(
                 .fillMaxSize()
                 .background(color = Color.White)
         ) {
-            HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+            HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
             Background()
             Box(
                 modifier = Modifier

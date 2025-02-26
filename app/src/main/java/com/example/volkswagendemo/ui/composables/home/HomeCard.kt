@@ -1,18 +1,13 @@
 package com.example.volkswagendemo.ui.composables.home
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -34,17 +29,19 @@ fun HomeCard(
     title: String,
     description: String,
     icon: Int,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    iconColor: Color,
+    fillColor: Color
 ) {
     Card(
+        elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x40AEE3F6)
-        ),
-        border = BorderStroke(1.dp, Color(0xFFB8D5E0))
+            containerColor = fillColor
+        )
     ) {
         Row(
             modifier = Modifier
@@ -53,29 +50,22 @@ fun HomeCard(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(color = colorResource(R.color.primary_red), shape = CircleShape)
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = iconColor
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
                     text = title,
-                    color = Color.Black,
+                    color = iconColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = description,
-                    color = Color.Black,
+                    color = iconColor,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal
                 )
@@ -86,10 +76,24 @@ fun HomeCard(
 
 @Preview(showBackground = true)
 @Composable
-fun HomeCardPreview() {
+fun HomeCardRedPreview() {
     HomeCard(
         title = "Inventario",
         description = "Escanea y registra chasises con RFID",
-        icon = R.drawable.list
+        icon = R.drawable.list,
+        iconColor = colorResource(R.color.tertiary_grey),
+        fillColor = colorResource(R.color.primary_red)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeCardGreyPreview() {
+    HomeCard(
+        title = "Inventario",
+        description = "Escanea y registra chasises con RFID",
+        icon = R.drawable.list,
+        iconColor = colorResource(R.color.primary_red),
+        fillColor = colorResource(R.color.tertiary_grey)
     )
 }

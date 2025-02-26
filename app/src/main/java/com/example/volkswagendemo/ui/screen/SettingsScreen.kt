@@ -10,9 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.Background
 import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.composables.settings.Settings
 
 @Composable
 fun SettingsScreen(
@@ -31,15 +35,20 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .background(color = Color.White)
         ) {
-            HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+            HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
             Background()
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-
+                Settings()
             }
         }
     }
+}
+@Preview
+@Composable
+fun SettingsScreenPreview() {
+    SettingsScreen(navigateToHome = {})
 }

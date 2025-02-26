@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,7 +20,7 @@ import com.example.volkswagendemo.R
 
 @Composable
 fun BatteryConnecting() {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.battery))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,9 +31,8 @@ fun BatteryConnecting() {
         LottieAnimation(
             composition = composition,
             modifier = Modifier
-                .padding(start = 32.dp)
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(240.dp),
             iterations = LottieConstants.IterateForever
         )
     }

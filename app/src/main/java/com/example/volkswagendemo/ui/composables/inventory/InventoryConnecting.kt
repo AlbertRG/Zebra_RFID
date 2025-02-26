@@ -22,7 +22,7 @@ import com.example.volkswagendemo.R
 @Composable
 fun InventoryConnecting() {
 
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.connecting))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
 
     Column(
         modifier = Modifier
@@ -35,7 +35,7 @@ fun InventoryConnecting() {
             composition = composition,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp),
+                .height(240.dp),
             iterations = LottieConstants.IterateForever
         )
     }

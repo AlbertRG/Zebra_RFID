@@ -1,6 +1,5 @@
 package com.example.volkswagendemo.ui.composables.battery
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,13 +30,13 @@ fun BatteryInfoCard(
     infoList: List<Pair<String, String>>
 ) {
     Card(
+        elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x40AEE3F6)
-        ),
-        border = BorderStroke(1.dp, Color(0xFFB8D5E0))
+            containerColor = colorResource(R.color.tertiary_grey)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -50,7 +50,8 @@ fun BatteryInfoCard(
             ) {
                 Icon(
                     painter = painterResource(id = icon),
-                    contentDescription = title
+                    contentDescription = title,
+                    tint = colorResource(R.color.primary_red)
                 )
             }
             Column(

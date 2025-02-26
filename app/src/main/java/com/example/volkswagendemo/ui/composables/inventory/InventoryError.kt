@@ -17,11 +17,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
@@ -43,7 +45,9 @@ fun InventoryError(
         LottieAnimation(
             composition = composition,
             modifier = Modifier
-                .size(240.dp)
+                .size(240.dp),
+            speed = 0.5f,
+            iterations = LottieConstants.IterateForever
         )
         Spacer(
             modifier = Modifier
@@ -56,7 +60,7 @@ fun InventoryError(
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "Verifica la conexion con la handheld",
+            text = "Verifica la conexion con el RFID",
             modifier = Modifier
                 .padding(top = 8.dp),
             color = Color.Gray,
@@ -67,7 +71,7 @@ fun InventoryError(
             modifier = Modifier
                 .width(240.dp)
                 .padding(vertical = 24.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFF05A6E1))
+            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_red))
         ) {
             Text(
                 text = "Reintentar"

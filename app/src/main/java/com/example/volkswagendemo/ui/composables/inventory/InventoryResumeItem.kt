@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,11 +59,12 @@ fun InventoryResumeItem(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.share),
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = colorResource(R.color.primary_red)
                 )
             }
         }
-        HorizontalDivider(thickness = 1.dp, color = Color(0xFFF0F0F0))
+        HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
     }
 
 }
