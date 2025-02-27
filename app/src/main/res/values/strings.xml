@@ -19,7 +19,7 @@
     <string name="inventory_button_start">Comenzar</string>
     <string name="inventory_button_pause">Pausar</string>
     <string name="inventory_button_continue">Continuar</string>
-    <string name="inventory_button_stop">Detener</string>
+    <string name="inventory_button_stop">Finalizar</string>
     <string name="inventory_button_new_reading">Nueva Lectura</string>
     <string name="inventory_button_share">Compartir</string>
     <string name="icon_description_back">Regresar</string>

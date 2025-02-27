@@ -16,6 +16,7 @@ import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.Background
 import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
 import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.composables.search.SearchError
 import com.example.volkswagendemo.ui.composables.search.SearchFiles
 import com.example.volkswagendemo.ui.composables.search.SearchPause
 import com.example.volkswagendemo.ui.composables.search.SearchReading
@@ -67,7 +68,7 @@ fun SearchScreen(
                     RfidSearchState.Reading -> SearchReading(searchViewModel)
                     RfidSearchState.Pause -> SearchPause(searchViewModel)
                     RfidSearchState.Stop -> {}
-                    RfidSearchState.Error -> {}
+                    RfidSearchState.Error -> SearchError(searchViewModel)
                 }
             }
         }

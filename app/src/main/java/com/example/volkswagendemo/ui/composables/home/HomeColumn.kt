@@ -53,6 +53,14 @@ fun HomeColumn(
             fillColor = colorResource(R.color.tertiary_grey)
         )
         HomeCard(
+            title = "Geiger",
+            description = "Localiza REPUVES",
+            icon = R.drawable.radar,
+            onClick = { },
+            iconColor = colorResource(R.color.tertiary_grey),
+            fillColor = colorResource(R.color.primary_red)
+        )
+        HomeCard(
             title = "Localizacion",
             description = "Actualiza tu localizacion",
             icon = R.drawable.location,
@@ -69,8 +77,8 @@ fun HomeColumn(
                     )
                 }
             },
-            iconColor = colorResource(R.color.tertiary_grey),
-            fillColor = colorResource(R.color.primary_red)
+            iconColor = colorResource(R.color.primary_red),
+            fillColor = colorResource(R.color.tertiary_grey)
         )
     }
 

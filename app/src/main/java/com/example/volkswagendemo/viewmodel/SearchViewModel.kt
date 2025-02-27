@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.TagData
 import com.example.volkswagendemo.ui.states.MutableSearchUiState
 import com.example.volkswagendemo.ui.states.RfidSearchState
+import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.utils.ConversionUtils
 import com.example.volkswagendemo.utils.ExcelUtils
 import com.zebra.rfid.api3.BEEPER_VOLUME
@@ -160,8 +161,8 @@ class SearchViewModel @Inject constructor(
     }
 
     fun performInventory() {
-        if (_searchUiState.rfidSearchState != RfidSearchState.Reading &&
-            _searchUiState.rfidSearchState != RfidSearchState.Stop
+        if (_searchUiState.rfidSearchState == RfidSearchState.Ready ||
+            _searchUiState.rfidSearchState == RfidSearchState.Pause
         ) {
             runCatching {
                 performInventoryRead()
@@ -198,7 +199,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun pauseInventory() {
-        if (_searchUiState.rfidSearchState != RfidSearchState.Pause) {
+        if (_searchUiState.rfidSearchState == RfidSearchState.Reading) {
             runCatching {
                 pauseInventoryRead()
             }.onFailure { exception ->
@@ -212,6 +213,9 @@ class SearchViewModel @Inject constructor(
         rfidReader?.Actions?.TagAccess?.stopAccess()
     }
 
+    fun retrySetupReader() {
+        setupSearch()
+    }
 
     private fun updateSearchState(rfidSearchState: RfidSearchState) {
         viewModelScope.launch {
@@ -304,7 +308,7 @@ class SearchViewModel @Inject constructor(
                     when (handheldEvent) {
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED -> {
                             try {
-                                //performInventory()
+                                performInventory()
                             } catch (e: Exception) {
                                 Log.e(
                                     "RFID_eventStatusNotify",
@@ -315,7 +319,7 @@ class SearchViewModel @Inject constructor(
 
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED -> {
                             try {
-                                //pauseInventory()
+                                pauseInventory()
                             } catch (e: Exception) {
                                 Log.e(
                                     "RFID_eventStatusNotify",
