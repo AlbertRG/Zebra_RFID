@@ -119,8 +119,8 @@ class ExcelUtils @Inject constructor(private val context: Context) {
                             for (rowIndex in 3 until sheet.physicalNumberOfRows) {
                                 val row = sheet.getRow(rowIndex)
 
-                                val vin = row?.getCell(0)?.toString()?.trim() ?: ""
-                                val repuve = row?.getCell(1)?.toString()?.trim() ?: ""
+                                val repuve = row?.getCell(0)?.toString()?.trim() ?: ""
+                                val vin = row?.getCell(1)?.toString()?.trim() ?: ""
 
                                 if (vin.isNotEmpty() && repuve.isNotEmpty()) {
                                     dataList.add(TagData(repuve, vin, ""))

@@ -14,24 +14,36 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.Background
-import com.example.volkswagendemo.ui.composables.inventory.InventoryStop
+import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
 import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
-import com.example.volkswagendemo.viewmodel.InventoryViewModel
+import com.example.volkswagendemo.ui.composables.search.SearchFiles
+import com.example.volkswagendemo.ui.composables.search.SearchPause
+import com.example.volkswagendemo.ui.composables.search.SearchReading
+import com.example.volkswagendemo.ui.composables.search.SearchReady
+import com.example.volkswagendemo.ui.states.RfidSearchState
+import com.example.volkswagendemo.viewmodel.SearchViewModel
 
 @Composable
 fun SearchScreen(
-    inventoryViewModel: InventoryViewModel,
+    searchViewModel: SearchViewModel,
     navigateToHome: () -> Unit,
 ) {
+    val searchUiState = searchViewModel.searchUiState
     Scaffold(
         topBar = {
             InventoryTopBar(
                 title = "Busqueda",
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
-                    /*when (rfidStatus) {
-
-                    }*/
+                    when (searchUiState.rfidSearchState) {
+                        RfidSearchState.Files -> {}
+                        RfidSearchState.SetupInfo -> {}
+                        RfidSearchState.Ready -> {}
+                        RfidSearchState.Reading -> {}
+                        RfidSearchState.Pause -> {}
+                        RfidSearchState.Stop -> {}
+                        RfidSearchState.Error -> {}
+                    }
                 }
             )
         }) { innerPadding ->
@@ -48,7 +60,15 @@ fun SearchScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                InventoryStop(inventoryViewModel)
+                when (searchUiState.rfidSearchState) {
+                    RfidSearchState.Files -> SearchFiles(searchViewModel)
+                    RfidSearchState.SetupInfo -> InventoryConnecting()
+                    RfidSearchState.Ready -> SearchReady(searchViewModel)
+                    RfidSearchState.Reading -> SearchReading(searchViewModel)
+                    RfidSearchState.Pause -> SearchPause(searchViewModel)
+                    RfidSearchState.Stop -> {}
+                    RfidSearchState.Error -> {}
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ import com.example.volkswagendemo.viewmodel.BatteryViewModel
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 import com.example.volkswagendemo.viewmodel.LocationViewModel
+import com.example.volkswagendemo.viewmodel.SearchViewModel
 
 @Composable
 fun NavigationWrapper() {
@@ -45,8 +46,8 @@ fun NavigationWrapper() {
         }
 
         composable<Search> {
-            val inventoryViewModel = hiltViewModel<InventoryViewModel>()
-            SearchScreen(inventoryViewModel) {
+            val searchViewModel = hiltViewModel<SearchViewModel>()
+            SearchScreen(searchViewModel) {
                 navController.navigate(Home) {
                     popUpTo<Home> { inclusive = true }
                 }

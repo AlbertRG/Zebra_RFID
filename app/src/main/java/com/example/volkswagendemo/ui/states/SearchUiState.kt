@@ -4,26 +4,37 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.volkswagendemo.data.TagData
 
 @Stable
 interface SearchUiState {
-    val tags: List<String>
-    val files: List<String>
-    val isConnecting: Boolean
-    val isConnected: Boolean
-    val isReading: Boolean
-    val isStopped: Boolean
-    val isOnResume: Boolean
-    val hasError: Boolean
+    val rfidSearchState: RfidSearchState
+    val scannedTags: List<TagData>
+    val filesList: List<String>
+    val selectedFileName: String
+    val fileData: List<TagData>
+    val isDevelopMode: Boolean
+    val isLocationSaved: Boolean
+    val isFileDialogVisible: Boolean
 }
 
 class MutableSearchUiState() : SearchUiState {
-    override var tags: List<String> by mutableStateOf(emptyList())
-    override var files: List<String> by mutableStateOf(emptyList())
-    override var isConnecting: Boolean by mutableStateOf(false)
-    override var isConnected: Boolean by mutableStateOf(false)
-    override var isReading: Boolean by mutableStateOf(false)
-    override var isStopped: Boolean by mutableStateOf(false)
-    override var isOnResume: Boolean by mutableStateOf(false)
-    override var hasError: Boolean by mutableStateOf(false)
+    override var rfidSearchState: RfidSearchState by mutableStateOf(RfidSearchState.Files)
+    override var scannedTags: List<TagData> by mutableStateOf(emptyList())
+    override var filesList: List<String> by mutableStateOf(emptyList())
+    override var selectedFileName: String by mutableStateOf("")
+    override var fileData: List<TagData> by mutableStateOf(emptyList())
+    override val isDevelopMode: Boolean by mutableStateOf(true)
+    override val isLocationSaved: Boolean by mutableStateOf(false)
+    override var isFileDialogVisible: Boolean by mutableStateOf(false)
+}
+
+sealed class RfidSearchState(val name: String) {
+    data object Files : RfidSearchState("Getting files")
+    data object SetupInfo : RfidSearchState("Setup info")
+    data object Ready : RfidSearchState("Ready")
+    data object Reading : RfidSearchState("Reading")
+    data object Pause : RfidSearchState("Pause")
+    data object Stop : RfidSearchState("Stop")
+    data object Error : RfidSearchState("Error")
 }

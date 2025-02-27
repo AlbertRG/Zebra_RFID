@@ -9,7 +9,7 @@ import com.example.volkswagendemo.ui.states.InventoryUiState
 import com.example.volkswagendemo.ui.states.MutableInventoryUiState
 import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.utils.ExcelUtils
-import com.example.volkswagendemo.utils.HexToAscii
+import com.example.volkswagendemo.utils.ConversionUtils
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
@@ -37,7 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
     application: Application,
-    private val hexToAscii: HexToAscii,
+    private val conversionUtils: ConversionUtils,
     private val excelUtils: ExcelUtils
 ) : ViewModel() {
 
@@ -276,8 +276,8 @@ class InventoryViewModel @Inject constructor(
 
                 if (_scannedTagsList.none { it.controlData == tag.memoryBankData }) {
 
-                    val repuve = hexToAscii.convert(tag.tagID.take(16))
-                    val vin = hexToAscii.convert(tag.memoryBankData.take(34))
+                    val repuve = conversionUtils.convert(tag.tagID.take(16))
+                    val vin = conversionUtils.convert(tag.memoryBankData.take(34))
                     val rawMemoryData = tag.memoryBankData
 
                     if (repuve == null || vin == null) {

@@ -38,7 +38,7 @@ private val EXTENDED_ASCII_CHAR = charArrayOf(
     0x207F.toChar(), 0x00B2.toChar(), 0x25A0.toChar(), 0x00A0.toChar()
 )
 
-class HexToAscii @Inject constructor() {
+class ConversionUtils @Inject constructor() {
 
     fun convert(tag: String): String? {
         return hex2ascii(tag)

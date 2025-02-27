@@ -31,9 +31,7 @@ fun InventoryScreen(
     inventoryViewModel: InventoryViewModel,
     navigateToHome: () -> Unit,
 ) {
-
     val inventoryUiState = inventoryViewModel.inventoryUiState
-
     Scaffold(
         topBar = {
             InventoryTopBar(
@@ -75,9 +73,7 @@ fun InventoryScreen(
             }
         }
     }
-
     if (inventoryUiState.isFileDialogVisible) {
         FileDialog(inventoryViewModel)
     }
-
 }

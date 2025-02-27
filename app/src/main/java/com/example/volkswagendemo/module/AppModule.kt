@@ -2,7 +2,7 @@ package com.example.volkswagendemo.module
 
 import android.app.Application
 import com.example.volkswagendemo.utils.ExcelUtils
-import com.example.volkswagendemo.utils.HexToAscii
+import com.example.volkswagendemo.utils.ConversionUtils
 import com.example.volkswagendemo.utils.LocationUtils
 import dagger.Module
 import dagger.Provides
@@ -28,8 +28,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHexToAscii(): HexToAscii {
-        return HexToAscii()
+    fun provideHexToAscii(): ConversionUtils {
+        return ConversionUtils()
     }
 
 }
