@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.utils
 
 import android.util.Log
+import javax.inject.Inject
 
 private val EXTENDED_ASCII_CHAR = charArrayOf(
     0x00C7.toChar(), 0x00FC.toChar(), 0x00E9.toChar(), 0x00E2.toChar(),
@@ -37,7 +38,7 @@ private val EXTENDED_ASCII_CHAR = charArrayOf(
     0x207F.toChar(), 0x00B2.toChar(), 0x25A0.toChar(), 0x00A0.toChar()
 )
 
-class HexToAscii {
+class HexToAscii @Inject constructor() {
 
     fun convert(tag: String): String? {
         return hex2ascii(tag)

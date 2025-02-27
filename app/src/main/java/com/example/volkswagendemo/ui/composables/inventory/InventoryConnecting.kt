@@ -21,9 +21,7 @@ import com.example.volkswagendemo.R
 
 @Composable
 fun InventoryConnecting() {
-
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
-
     Column(
         modifier = Modifier
             .fillMaxSize()

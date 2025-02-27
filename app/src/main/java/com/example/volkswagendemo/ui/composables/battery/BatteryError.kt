@@ -53,13 +53,13 @@ fun BatteryError(
                 .height(16.dp)
         )
         Text(
-            text = stringResource(R.string.error_title),
+            text = stringResource(R.string.error_connecting),
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = stringResource(R.string.error_connecting),
+            text = stringResource(R.string.error_connecting_hint),
             modifier = Modifier
                 .padding(top = 8.dp),
             color = Color.Gray,
@@ -73,7 +73,7 @@ fun BatteryError(
             colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_red))
         ) {
             Text(
-                text = stringResource(R.string.retry)
+                text = stringResource(R.string.button_retry)
             )
         }
     }

@@ -66,14 +66,13 @@ fun InventoryResumeItem(
         }
         HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
     }
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun InventoryResumeItemPreview() {
     InventoryResumeItem(
-        fileName = "Taller123 2024-12-18 14:02:00 catalogoln.xls",
+        fileName = "Taller123 2024-12-18 14:02:00.xls",
         onClickListener = {}
     )
 }

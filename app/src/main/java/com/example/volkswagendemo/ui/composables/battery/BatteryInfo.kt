@@ -48,7 +48,7 @@ fun BatteryInfo(
             icon = R.drawable.health_metrics,
             title = stringResource(R.string.health_metrics),
             infoList = listOf(
-                stringResource(R.string.health_status) to batteryUiState.health.toString(),
+                stringResource(R.string.health_status) to "${batteryUiState.health}%",
                 stringResource(R.string.cycle_count) to batteryUiState.cycleCount.toString()
             )
         )
@@ -56,7 +56,7 @@ fun BatteryInfo(
             icon = R.drawable.thermostat,
             title = stringResource(R.string.temperature),
             infoList = listOf(
-                stringResource(R.string.current) to batteryUiState.temperature.toString()
+                stringResource(R.string.current) to "${batteryUiState.temperature}°C"
             )
         )
     }

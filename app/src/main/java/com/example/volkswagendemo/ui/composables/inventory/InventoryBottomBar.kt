@@ -27,7 +27,6 @@ fun InventoryBottomBar(
     title2: String,
     onClickListener2: (() -> Unit),
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -80,7 +79,7 @@ fun InventoryBottomBar(
 fun InventoryBottomBarPreview() {
     InventoryBottomBar(
         isDualMode = false,
-        title = "Reanudar lectura",
+        title = "Start",
         onClickListener = {},
         title2 = "",
         onClickListener2 = {}
@@ -92,9 +91,9 @@ fun InventoryBottomBarPreview() {
 fun InventoryBottomBarDualModePreview() {
     InventoryBottomBar(
         isDualMode = true,
-        title = "Reanudar lectura",
+        title = "Continue",
         onClickListener = {},
-        title2 = "Finalizar lectura",
+        title2 = "Resume",
         onClickListener2 = {}
     )
 }

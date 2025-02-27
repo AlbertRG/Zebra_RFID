@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,10 +27,8 @@ import com.example.volkswagendemo.R
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
-fun InventoryReady(inventoryViewModel: InventoryViewModel) {
-
+fun InventoryStart(inventoryViewModel: InventoryViewModel) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_list))
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,20 +48,20 @@ fun InventoryReady(inventoryViewModel: InventoryViewModel) {
                 .height(24.dp)
         )
         Text(
-            text = "Tu inventario esta vacio",
+            text = stringResource(R.string.inventory_empty_message),
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "Utiliza la terminal para",
+            text = stringResource(R.string.inventory_instruction_part1),
             modifier = Modifier
                 .padding(top = 8.dp),
             color = Color.Gray,
             fontSize = 14.sp,
         )
         Text(
-            text = "buscar VINs disponibles",
+            text = stringResource(R.string.inventory_instruction_part2),
             color = Color.Gray,
             fontSize = 14.sp,
         )
@@ -74,8 +73,8 @@ fun InventoryReady(inventoryViewModel: InventoryViewModel) {
     ) {
         InventoryBottomBar(
             isDualMode = false,
-            title = "Comenzar",
-            onClickListener = { inventoryViewModel.startInventory() },
+            title = stringResource(R.string.inventory_button_start),
+            onClickListener = { inventoryViewModel.performInventory() },
             title2 = "",
             onClickListener2 = {}
         )

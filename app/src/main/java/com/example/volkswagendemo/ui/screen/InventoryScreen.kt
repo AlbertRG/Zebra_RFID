@@ -1,35 +1,29 @@
 package com.example.volkswagendemo.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.Background
 import com.example.volkswagendemo.ui.composables.dialog.FileDialog
 import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
 import com.example.volkswagendemo.ui.composables.inventory.InventoryError
+import com.example.volkswagendemo.ui.composables.inventory.InventoryPause
 import com.example.volkswagendemo.ui.composables.inventory.InventoryReading
-import com.example.volkswagendemo.ui.composables.inventory.InventoryReady
-import com.example.volkswagendemo.ui.composables.inventory.InventoryResume
-import com.example.volkswagendemo.ui.composables.inventory.InventoryStopped
+import com.example.volkswagendemo.ui.composables.inventory.InventoryStart
+import com.example.volkswagendemo.ui.composables.inventory.InventoryStop
 import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -38,39 +32,22 @@ fun InventoryScreen(
     navigateToHome: () -> Unit,
 ) {
 
-    val rfidStatus by inventoryViewModel.inventoryStatus.collectAsState()
-    val showFileDialog by inventoryViewModel.showFileDialog.collectAsState()
-    val tags by inventoryViewModel.tagsFlow.collectAsState()
+    val inventoryUiState = inventoryViewModel.inventoryUiState
 
     Scaffold(
         topBar = {
             InventoryTopBar(
-                title = "Inventario",
+                title = stringResource(R.string.inventory_title),
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
-                    /*when (rfidStatus) {
-
-                        "Stopped" ->
-                            IconButton(
-                                onClick = { }
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.camera),
-                                    contentDescription = null,
-
-                                    )
-                            }
-
-                        "Resume" ->
-                            IconButton(
-                                onClick = { }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
-                                    contentDescription = null
-                                )
-                            }
-                    }*/
+                    when (inventoryUiState.rfidState) {
+                        RfidState.Connecting -> {}
+                        RfidState.Start -> {}
+                        RfidState.Reading -> {}
+                        RfidState.Pause -> {}
+                        RfidState.Stop -> {}
+                        RfidState.Error -> {}
+                    }
                 }
             )
         }) { innerPadding ->
@@ -87,19 +64,19 @@ fun InventoryScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                when (rfidStatus) {
-                    "Connecting" -> InventoryConnecting()
-                    "Ready" -> InventoryReady(inventoryViewModel)
-                    "Reading" -> InventoryReading(inventoryViewModel, tags)
-                    "Stopped" -> InventoryStopped(inventoryViewModel, tags)
-                    "Resume" -> InventoryResume(inventoryViewModel)
-                    "Error" -> InventoryError(inventoryViewModel)
+                when (inventoryUiState.rfidState) {
+                    RfidState.Connecting -> InventoryConnecting()
+                    RfidState.Start -> InventoryStart(inventoryViewModel)
+                    RfidState.Reading -> InventoryReading(inventoryViewModel)
+                    RfidState.Pause -> InventoryPause(inventoryViewModel)
+                    RfidState.Stop -> InventoryStop(inventoryViewModel)
+                    RfidState.Error -> InventoryError(inventoryViewModel)
                 }
             }
         }
     }
 
-    if (showFileDialog) {
+    if (inventoryUiState.isFileDialogVisible) {
         FileDialog(inventoryViewModel)
     }
 

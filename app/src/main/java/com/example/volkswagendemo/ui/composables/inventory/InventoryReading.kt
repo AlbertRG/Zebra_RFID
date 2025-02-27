@@ -15,18 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.data.TagData
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
 fun InventoryReading(
-    inventoryViewModel: InventoryViewModel,
-    tags: List<TagData> = emptyList()
+    inventoryViewModel: InventoryViewModel
 ) {
+    val inventoryUiState = inventoryViewModel.inventoryUiState
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,7 +34,7 @@ fun InventoryReading(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = tags.size.toString(),
+            text = inventoryUiState.scannedTags.size.toString(),
             modifier = Modifier
                 .padding(top = 8.dp),
             color = colorResource(R.color.primary_red),
@@ -42,7 +42,7 @@ fun InventoryReading(
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "Lecturas",
+            text = stringResource(R.string.inventory_readings),
             color = Color.Gray,
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal
@@ -57,7 +57,7 @@ fun InventoryReading(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(tags) { tag ->
+            items(inventoryUiState.scannedTags) { tag ->
                 InventoryCard(
                     repuve = tag.repuve,
                     vin = tag.vin
@@ -66,8 +66,8 @@ fun InventoryReading(
         }
         InventoryBottomBar(
             isDualMode = false,
-            title = "Parar",
-            onClickListener = {inventoryViewModel.stopInventory()},
+            title = stringResource(R.string.inventory_button_pause),
+            onClickListener = { inventoryViewModel.pauseInventory() },
             title2 = "",
             onClickListener2 = {}
         )

@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.module
 
 import android.app.Application
+import com.example.volkswagendemo.utils.ExcelUtils
 import com.example.volkswagendemo.utils.HexToAscii
 import com.example.volkswagendemo.utils.LocationUtils
 import dagger.Module
@@ -17,6 +18,12 @@ object AppModule {
     @Singleton
     fun provideLocationUtils(application: Application): LocationUtils {
         return LocationUtils(application)
+    }
+
+    @Provides
+    @Singleton
+    fun provideExcelUtils(application: Application): ExcelUtils {
+        return ExcelUtils(application)
     }
 
     @Provides

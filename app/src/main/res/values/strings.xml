@@ -1,8 +1,28 @@
 <resources>
     <string name="app_name">RFID Altatec</string>
 
+    <!--General-->
+    <string name="button_accept">Aceptar</string>
+    <string name="button_retry">Reintentar</string>
+    <string name="error_connecting">¡Ups! Ocurrio un error</string>
+    <string name="error_connecting_hint">Verifica la conexión con el lector RFID</string>
+
     <!--LocationDialog-->
     <string name="internet_error">Por favor verifica tu conexión a internet</string>
+
+    <!--InventoryScreen-->
+    <string name="inventory_title">Inventario</string>
+    <string name="inventory_empty_message">Tu inventario esta vacio</string>
+    <string name="inventory_instruction_part1">Utiliza la terminal para</string>
+    <string name="inventory_instruction_part2">buscar VINs disponibles</string>
+    <string name="inventory_readings">Lecturas</string>
+    <string name="inventory_button_start">Comenzar</string>
+    <string name="inventory_button_pause">Pausar</string>
+    <string name="inventory_button_continue">Continuar</string>
+    <string name="inventory_button_stop">Detener</string>
+    <string name="inventory_button_new_reading">Nueva Lectura</string>
+    <string name="inventory_button_share">Compartir</string>
+    <string name="icon_description_back">Regresar</string>
 
     <!--BatteryScreen-->
     <string name="battery_title">Información de Batería</string>
@@ -16,10 +36,5 @@
     <string name="temperature">Temperatura de funcionamiento</string>
     <string name="current">Actual</string>
     <string name="percentage_symbol">%</string>
-
-    <!--ErrorConnection-->
-    <string name="error_title">¡Opss! Ocurrió un error</string>
-    <string name="error_connecting">Verifica la conexión con la handheld</string>
-    <string name="retry">Reintentar</string>
 
 </resources>

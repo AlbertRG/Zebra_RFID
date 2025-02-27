@@ -19,16 +19,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,15 +38,9 @@ import com.example.volkswagendemo.viewmodel.InventoryViewModel
 fun FileDialog(
     inventoryViewModel: InventoryViewModel
 ) {
-
-    var openDialog by remember { mutableStateOf(true) }
-    val isLocationSave by remember { mutableStateOf(true) }
-
-    val fileName by inventoryViewModel.fileName.collectAsState()
-    val vins by inventoryViewModel.vinFlow.collectAsState()
-
+    val inventoryUiState = inventoryViewModel.inventoryUiState
     Dialog(
-        onDismissRequest = { openDialog = false },
+        onDismissRequest = { inventoryViewModel.closeFileDialog() },
         properties = DialogProperties(
             dismissOnBackPress = false,
             dismissOnClickOutside = false
@@ -76,18 +66,21 @@ fun FileDialog(
                     tint = Color.Unspecified
                 )
                 Text(
-                    text = fileName,
+                    text = inventoryUiState.selectedFileName,
                     modifier = Modifier
                         .padding(vertical = 16.dp),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
-                if (isLocationSave) {
+                if (inventoryUiState.isLocationSaved) {
                     LocationInfo(
                         location = LocationData(0.0, 0.0),
                         address = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal."
                     )
-                    HorizontalDivider(thickness = 1.dp, color = colorResource(R.color.tertiary_grey))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = colorResource(R.color.tertiary_grey)
+                    )
                 }
                 LazyColumn(
                     modifier = Modifier
@@ -95,9 +88,9 @@ fun FileDialog(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(vins) { vin ->
+                    items(inventoryUiState.fileData) { data ->
                         Text(
-                            text = vin,
+                            text = "${data.repuve} - ${data.vin}",
                             modifier = Modifier
                                 .padding(top = 8.dp),
                             fontSize = 14.sp,
@@ -117,7 +110,7 @@ fun FileDialog(
                         }
                     ) {
                         Text(
-                            text = "Compartir",
+                            text = stringResource(R.string.inventory_button_share),
                             color = Color.Gray
                         )
                     }
@@ -126,7 +119,7 @@ fun FileDialog(
                         onClick = { inventoryViewModel.closeFileDialog() }
                     ) {
                         Text(
-                            text = "Aceptar",
+                            text = stringResource(R.string.button_accept),
                             color = colorResource(R.color.primary_red)
                         )
                     }
