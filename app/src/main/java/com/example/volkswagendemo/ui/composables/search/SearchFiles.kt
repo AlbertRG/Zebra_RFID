@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.inventory.InventoryBottomBar
-import com.example.volkswagendemo.ui.composables.inventory.InventoryResumeItem
 import com.example.volkswagendemo.viewmodel.SearchViewModel
 
 @Composable

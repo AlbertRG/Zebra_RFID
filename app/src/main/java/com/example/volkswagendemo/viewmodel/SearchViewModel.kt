@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.TagData
 import com.example.volkswagendemo.ui.states.MutableSearchUiState
 import com.example.volkswagendemo.ui.states.RfidSearchState
-import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.utils.ConversionUtils
 import com.example.volkswagendemo.utils.ExcelUtils
 import com.zebra.rfid.api3.BEEPER_VOLUME
