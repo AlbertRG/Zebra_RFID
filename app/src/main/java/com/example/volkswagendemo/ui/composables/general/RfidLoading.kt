@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.inventory
+package com.example.volkswagendemo.ui.composables.general
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -20,7 +19,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
 
 @Composable
-fun InventoryConnecting() {
+fun RfidLoading() {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
     Column(
         modifier = Modifier
@@ -37,10 +36,4 @@ fun InventoryConnecting() {
             iterations = LottieConstants.IterateForever
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun InventoryConnectingPreview() {
-    InventoryConnecting()
 }

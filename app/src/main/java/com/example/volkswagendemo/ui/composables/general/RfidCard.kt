@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.inventory
+package com.example.volkswagendemo.ui.composables.general
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun InventoryCard(
+fun RfidCard(
     repuve: String,
-    vin: String,
+    vin: String
 ) {
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
@@ -60,8 +60,8 @@ fun InventoryCard(
 
 @Preview(showBackground = true)
 @Composable
-fun InventoryCardPreview() {
-    InventoryCard(
+fun RfidCardPreview() {
+    RfidCard(
         repuve = "07180513",
         vin = "WAUGFCF47PA059539"
     )

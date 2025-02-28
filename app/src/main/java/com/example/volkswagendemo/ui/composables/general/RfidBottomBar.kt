@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.inventory
+package com.example.volkswagendemo.ui.composables.general
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
 
 @Composable
-fun InventoryBottomBar(
+fun RfidBottomBar(
     isDualMode: Boolean,
     title: String,
     onClickListener: (() -> Unit),
@@ -76,8 +76,8 @@ fun InventoryBottomBar(
 
 @Preview(showBackground = true)
 @Composable
-fun InventoryBottomBarPreview() {
-    InventoryBottomBar(
+fun RfidBottomBarPreview() {
+    RfidBottomBar(
         isDualMode = false,
         title = "Start",
         onClickListener = {},
@@ -89,7 +89,7 @@ fun InventoryBottomBarPreview() {
 @Preview(showBackground = true)
 @Composable
 fun InventoryBottomBarDualModePreview() {
-    InventoryBottomBar(
+    RfidBottomBar(
         isDualMode = true,
         title = "Continue",
         onClickListener = {},

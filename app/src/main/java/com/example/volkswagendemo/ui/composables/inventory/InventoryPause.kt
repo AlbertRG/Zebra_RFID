@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
+import com.example.volkswagendemo.ui.composables.general.RfidCard
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -58,13 +60,13 @@ fun InventoryPause(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(inventoryUiState.scannedTags) { tag ->
-                InventoryCard(
+                RfidCard(
                     repuve = tag.repuve,
                     vin = tag.vin
                 )
             }
         }
-        InventoryBottomBar(
+        RfidBottomBar(
             isDualMode = true,
             title = stringResource(R.string.inventory_button_continue),
             onClickListener = { inventoryViewModel.performInventory() },

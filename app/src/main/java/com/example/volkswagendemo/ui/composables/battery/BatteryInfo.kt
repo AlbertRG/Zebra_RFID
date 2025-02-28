@@ -91,6 +91,5 @@ fun BatteryPercentage(
             .height(8.dp),
         color = colorResource(R.color.primary_red),
         trackColor = Color.LightGray,
-        gapSize = (-5).dp
     )
 }

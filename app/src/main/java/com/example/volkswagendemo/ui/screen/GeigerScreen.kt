@@ -11,39 +11,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.geiger.GeigerFiles
+import com.example.volkswagendemo.ui.composables.geiger.GeigerReady
 import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.general.RfidLoading
 import com.example.volkswagendemo.ui.composables.general.RfidTopBar
-import com.example.volkswagendemo.ui.composables.search.SearchError
-import com.example.volkswagendemo.ui.composables.search.SearchFiles
-import com.example.volkswagendemo.ui.composables.search.SearchPause
-import com.example.volkswagendemo.ui.composables.search.SearchReading
-import com.example.volkswagendemo.ui.composables.search.SearchReady
-import com.example.volkswagendemo.ui.states.RfidSearchState
-import com.example.volkswagendemo.viewmodel.SearchViewModel
+import com.example.volkswagendemo.ui.states.RfidGeigerState
+import com.example.volkswagendemo.viewmodel.GeigerViewModel
 
 @Composable
-fun SearchScreen(
-    searchViewModel: SearchViewModel,
+fun GeigerScreen(
+    geigerViewModel: GeigerViewModel,
     navigateToHome: () -> Unit,
 ) {
-    val searchUiState = searchViewModel.searchUiState
+    val geigerUiState = geigerViewModel.geigerUiState
     Scaffold(
         topBar = {
             RfidTopBar(
-                title = "Busqueda",
+                title = "Geiger",
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
-                    when (searchUiState.rfidSearchState) {
-                        RfidSearchState.Files -> {}
-                        RfidSearchState.Setup -> {}
-                        RfidSearchState.Ready -> {}
-                        RfidSearchState.Reading -> {}
-                        RfidSearchState.Pause -> {}
-                        RfidSearchState.Stop -> {}
-                        RfidSearchState.Error -> {}
+                    when (geigerUiState.rfidGeigerState) {
+                        RfidGeigerState.Files -> {}
+                        RfidGeigerState.Setup -> {}
+                        RfidGeigerState.Ready -> {}
+                        RfidGeigerState.Reading -> {}
+                        RfidGeigerState.Pause -> {}
+                        RfidGeigerState.Stop -> {}
+                        RfidGeigerState.Error -> {}
                     }
                 }
             )
@@ -61,14 +59,14 @@ fun SearchScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                when (searchUiState.rfidSearchState) {
-                    RfidSearchState.Files -> SearchFiles(searchViewModel)
-                    RfidSearchState.Setup -> RfidLoading()
-                    RfidSearchState.Ready -> SearchReady(searchViewModel)
-                    RfidSearchState.Reading -> SearchReading(searchViewModel)
-                    RfidSearchState.Pause -> SearchPause(searchViewModel)
-                    RfidSearchState.Stop -> {}
-                    RfidSearchState.Error -> SearchError(searchViewModel)
+                when (geigerUiState.rfidGeigerState) {
+                    RfidGeigerState.Files -> GeigerFiles(geigerViewModel)
+                    RfidGeigerState.Setup -> RfidLoading()
+                    RfidGeigerState.Ready -> GeigerReady(geigerViewModel)
+                    RfidGeigerState.Reading -> GeigerReady(geigerViewModel)
+                    RfidGeigerState.Pause -> {}
+                    RfidGeigerState.Stop -> {}
+                    RfidGeigerState.Error -> {}
                 }
             }
         }

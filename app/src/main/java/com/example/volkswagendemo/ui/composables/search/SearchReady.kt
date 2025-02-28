@@ -20,7 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.inventory.InventoryBottomBar
+import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
+import com.example.volkswagendemo.ui.composables.general.RfidCard
 import com.example.volkswagendemo.viewmodel.SearchViewModel
 
 @Composable
@@ -59,13 +60,13 @@ fun SearchReady(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(searchUiState.fileData) { tag ->
-                SearchCard(
+                RfidCard(
                     repuve = tag.repuve,
                     vin = tag.vin
                 )
             }
         }
-        InventoryBottomBar(
+        RfidBottomBar(
             isDualMode = false,
             title = stringResource(R.string.search_button_startSearch),
             onClickListener = { searchViewModel.performInventory() },

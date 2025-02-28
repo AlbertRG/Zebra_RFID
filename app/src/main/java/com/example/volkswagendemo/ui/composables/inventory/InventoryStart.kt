@@ -24,6 +24,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -71,7 +72,7 @@ fun InventoryStart(inventoryViewModel: InventoryViewModel) {
             .fillMaxSize(),
         contentAlignment = Alignment.BottomEnd
     ) {
-        InventoryBottomBar(
+        RfidBottomBar(
             isDualMode = false,
             title = stringResource(R.string.inventory_button_start),
             onClickListener = { inventoryViewModel.performInventory() },

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -38,7 +39,7 @@ fun InventoryStop(
                 )
             }
         }
-        InventoryBottomBar(
+        RfidBottomBar(
             isDualMode = false,
             title = stringResource(R.string.inventory_button_new_reading),
             onClickListener = { inventoryViewModel.resetInventoryState() },

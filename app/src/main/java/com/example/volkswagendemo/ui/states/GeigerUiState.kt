@@ -7,8 +7,8 @@ import androidx.compose.runtime.setValue
 import com.example.volkswagendemo.data.RfidData
 
 @Stable
-interface SearchUiState {
-    val rfidSearchState: RfidSearchState
+interface GeigerUiState {
+    val rfidGeigerState: RfidGeigerState
     val scannedTags: List<RfidData>
     val filesList: List<String>
     val selectedFileName: String
@@ -18,8 +18,8 @@ interface SearchUiState {
     val isFileDialogVisible: Boolean
 }
 
-class MutableSearchUiState() : SearchUiState {
-    override var rfidSearchState: RfidSearchState by mutableStateOf(RfidSearchState.Files)
+class MutableGeigerUiState() : GeigerUiState {
+    override var rfidGeigerState: RfidGeigerState by mutableStateOf(RfidGeigerState.Files)
     override var scannedTags: List<RfidData> by mutableStateOf(emptyList())
     override var filesList: List<String> by mutableStateOf(emptyList())
     override var selectedFileName: String by mutableStateOf("")
@@ -29,12 +29,12 @@ class MutableSearchUiState() : SearchUiState {
     override var isFileDialogVisible: Boolean by mutableStateOf(false)
 }
 
-sealed class RfidSearchState(val name: String) {
-    data object Files : RfidSearchState("Getting files")
-    data object Setup : RfidSearchState("Setup")
-    data object Ready : RfidSearchState("Ready")
-    data object Reading : RfidSearchState("Reading")
-    data object Pause : RfidSearchState("Pause")
-    data object Stop : RfidSearchState("Stop")
-    data object Error : RfidSearchState("Error")
+sealed class RfidGeigerState(val name: String) {
+    data object Files : RfidGeigerState("Getting files")
+    data object Setup : RfidGeigerState("Setup")
+    data object Ready : RfidGeigerState("Ready")
+    data object Reading : RfidGeigerState("Reading")
+    data object Pause : RfidGeigerState("Pause")
+    data object Stop : RfidGeigerState("Stop")
+    data object Error : RfidGeigerState("Error")
 }

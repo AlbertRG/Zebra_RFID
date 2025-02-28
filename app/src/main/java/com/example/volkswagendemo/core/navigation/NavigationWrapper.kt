@@ -6,11 +6,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.volkswagendemo.ui.screen.BatteryScreen
+import com.example.volkswagendemo.ui.screen.GeigerScreen
 import com.example.volkswagendemo.ui.screen.HomeScreen
 import com.example.volkswagendemo.ui.screen.InventoryScreen
 import com.example.volkswagendemo.ui.screen.SearchScreen
 import com.example.volkswagendemo.ui.screen.SettingsScreen
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
+import com.example.volkswagendemo.viewmodel.GeigerViewModel
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 import com.example.volkswagendemo.viewmodel.LocationViewModel
@@ -31,6 +33,7 @@ fun NavigationWrapper() {
                 locationViewModel,
                 { navController.navigate(Inventory) },
                 { navController.navigate(Search) },
+                { navController.navigate(Geiger) },
                 { navController.navigate(Battery) },
                 { navController.navigate(Settings) }
             )
@@ -48,6 +51,15 @@ fun NavigationWrapper() {
         composable<Search> {
             val searchViewModel = hiltViewModel<SearchViewModel>()
             SearchScreen(searchViewModel) {
+                navController.navigate(Home) {
+                    popUpTo<Home> { inclusive = true }
+                }
+            }
+        }
+
+        composable<Geiger> {
+            val geigerViewModel = hiltViewModel<GeigerViewModel>()
+            GeigerScreen(geigerViewModel) {
                 navController.navigate(Home) {
                     popUpTo<Home> { inclusive = true }
                 }

@@ -17,7 +17,8 @@ import com.example.volkswagendemo.viewmodel.LocationViewModel
 fun HomeColumn(
     homeViewModel: HomeViewModel,
     locationViewModel: LocationViewModel,
-    navigateToSearch: () -> Unit
+    navigateToSearch: () -> Unit,
+    navigateToGeiger: () -> Unit
 ) {
 
     val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
@@ -56,7 +57,7 @@ fun HomeColumn(
             title = "Geiger",
             description = "Localiza REPUVES",
             icon = R.drawable.radar,
-            onClick = { },
+            onClick = { navigateToGeiger() },
             iconColor = colorResource(R.color.tertiary_grey),
             fillColor = colorResource(R.color.primary_red)
         )

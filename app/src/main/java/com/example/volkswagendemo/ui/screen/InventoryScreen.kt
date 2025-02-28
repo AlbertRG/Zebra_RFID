@@ -14,15 +14,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.Background
+import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.dialog.FileDialog
-import com.example.volkswagendemo.ui.composables.inventory.InventoryConnecting
+import com.example.volkswagendemo.ui.composables.general.RfidLoading
 import com.example.volkswagendemo.ui.composables.inventory.InventoryError
 import com.example.volkswagendemo.ui.composables.inventory.InventoryPause
 import com.example.volkswagendemo.ui.composables.inventory.InventoryReading
 import com.example.volkswagendemo.ui.composables.inventory.InventoryStart
 import com.example.volkswagendemo.ui.composables.inventory.InventoryStop
-import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.composables.general.RfidTopBar
 import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
@@ -34,7 +34,7 @@ fun InventoryScreen(
     val inventoryUiState = inventoryViewModel.inventoryUiState
     Scaffold(
         topBar = {
-            InventoryTopBar(
+            RfidTopBar(
                 title = stringResource(R.string.inventory_title),
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
@@ -63,7 +63,7 @@ fun InventoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (inventoryUiState.rfidState) {
-                    RfidState.Connecting -> InventoryConnecting()
+                    RfidState.Connecting -> RfidLoading()
                     RfidState.Start -> InventoryStart(inventoryViewModel)
                     RfidState.Reading -> InventoryReading(inventoryViewModel)
                     RfidState.Pause -> InventoryPause(inventoryViewModel)

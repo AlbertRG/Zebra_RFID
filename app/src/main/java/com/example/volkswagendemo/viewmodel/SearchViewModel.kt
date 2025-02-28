@@ -4,10 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.volkswagendemo.data.TagData
+import com.example.volkswagendemo.data.RfidData
 import com.example.volkswagendemo.ui.states.MutableSearchUiState
 import com.example.volkswagendemo.ui.states.RfidSearchState
-import com.example.volkswagendemo.ui.states.RfidState
 import com.example.volkswagendemo.utils.ConversionUtils
 import com.example.volkswagendemo.utils.ExcelUtils
 import com.zebra.rfid.api3.BEEPER_VOLUME
@@ -48,7 +47,7 @@ class SearchViewModel @Inject constructor(
     private var readerDevice: ReaderDevice? = null
     private var rfidReader: RFIDReader? = null
     private val eventHandler = EventHandler()
-    private val _scannedTagsList = mutableListOf<TagData>()
+    private val _scannedTagsList = mutableListOf<RfidData>()
 
     init {
         getFilesList()
@@ -63,7 +62,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun setupSearch() {
-        if (_searchUiState.rfidSearchState != RfidSearchState.SetupInfo) {
+        if (_searchUiState.rfidSearchState != RfidSearchState.Setup) {
             runCatching {
                 getSelectedFileData()
                 connectReader()
@@ -75,7 +74,7 @@ class SearchViewModel @Inject constructor(
 
     private fun getSelectedFileData() {
         _searchUiState.fileData = excelUtils.readSpecificExcelFile(_searchUiState.selectedFileName)
-        updateSearchState(rfidSearchState = RfidSearchState.SetupInfo)
+        updateSearchState(rfidSearchState = RfidSearchState.Setup)
     }
 
     private fun connectReader() {
@@ -254,11 +253,11 @@ class SearchViewModel @Inject constructor(
         override fun eventReadNotify(e: RfidReadEvents?) {
             rfidReader?.Actions?.getReadTags(100)?.forEach { tag ->
 
-                if (_scannedTagsList.none { it.controlData == tag.memoryBankData }) {
+                if (_scannedTagsList.none { it.tagID == tag.tagID }) {
 
                     val repuve = conversionUtils.convert(tag.tagID.take(16))
                     val vin = conversionUtils.convert(tag.memoryBankData.take(34))
-                    val rawMemoryData = tag.memoryBankData
+                    val tagID = tag.tagID
 
                     if (repuve == null || vin == null) {
                         Log.e(
@@ -270,10 +269,10 @@ class SearchViewModel @Inject constructor(
 
                     if (repuve.all { it.isDigit() } && vin.all { it.isLetterOrDigit() }) {
                         val tagData =
-                            TagData(
+                            RfidData(
+                                tagID = tagID,
                                 repuve = repuve,
-                                vin = vin,
-                                controlData = rawMemoryData
+                                vin = vin
                             )
                         Log.d(
                             "RFID_eventReadNotify",

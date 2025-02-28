@@ -12,6 +12,9 @@ object Inventory
 object Search
 
 @Serializable
+object Geiger
+
+@Serializable
 object Battery
 
 @Serializable

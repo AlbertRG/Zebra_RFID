@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.inventory
+package com.example.volkswagendemo.ui.composables.general
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,7 +19,7 @@ import com.example.volkswagendemo.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryTopBar(
+fun RfidTopBar(
     title: String,
     onNavigationBack: (() -> Unit),
     iconAction: (@Composable () -> Unit)? = null
@@ -53,8 +53,8 @@ fun InventoryTopBar(
 
 @Preview(showBackground = true)
 @Composable
-fun InventoryTopBarPreview() {
-    InventoryTopBar(
+fun RfidTopBarPreview() {
+    RfidTopBar(
         title = stringResource(R.string.inventory_title),
         onNavigationBack = {},
         iconAction = {

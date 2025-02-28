@@ -1,21 +1,19 @@
 package com.example.volkswagendemo.viewmodel
 
 import android.app.Application
+import android.util.ArrayMap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.RfidData
-import com.example.volkswagendemo.ui.states.InventoryUiState
-import com.example.volkswagendemo.ui.states.MutableInventoryUiState
-import com.example.volkswagendemo.ui.states.RfidState
+import com.example.volkswagendemo.ui.states.MutableGeigerUiState
+import com.example.volkswagendemo.ui.states.RfidGeigerState
 import com.example.volkswagendemo.utils.ExcelUtils
-import com.example.volkswagendemo.utils.ConversionUtils
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
 import com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE
 import com.zebra.rfid.api3.InvalidUsageException
-import com.zebra.rfid.api3.MEMORY_BANK
 import com.zebra.rfid.api3.OperationFailureException
 import com.zebra.rfid.api3.RFIDReader
 import com.zebra.rfid.api3.ReaderDevice
@@ -26,7 +24,7 @@ import com.zebra.rfid.api3.RfidStatusEvents
 import com.zebra.rfid.api3.START_TRIGGER_TYPE
 import com.zebra.rfid.api3.STATUS_EVENT_TYPE
 import com.zebra.rfid.api3.STOP_TRIGGER_TYPE
-import com.zebra.rfid.api3.TagAccess
+import com.zebra.rfid.api3.TagData
 import com.zebra.rfid.api3.TriggerInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -35,14 +33,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InventoryViewModel @Inject constructor(
+class GeigerViewModel @Inject constructor(
     application: Application,
-    private val conversionUtils: ConversionUtils,
     private val excelUtils: ExcelUtils
 ) : ViewModel() {
-
-    private val _inventoryUiState = MutableInventoryUiState()
-    val inventoryUiState: InventoryUiState = _inventoryUiState
+    private val _geigerUiState = MutableGeigerUiState()
+    val geigerUiState: MutableGeigerUiState = _geigerUiState
 
     private var readers = Readers(application.applicationContext, ENUM_TRANSPORT.SERVICE_USB)
     private var readerDevice: ReaderDevice? = null
@@ -51,7 +47,31 @@ class InventoryViewModel @Inject constructor(
     private val _scannedTagsList = mutableListOf<RfidData>()
 
     init {
-        connectReader()
+        getFilesList()
+    }
+
+    private fun getFilesList() {
+        _geigerUiState.filesList = excelUtils.indexExcelFiles("Demo")
+    }
+
+    fun selectFile(file: String) {
+        _geigerUiState.selectedFileName = file
+    }
+
+    fun setupGeiger() {
+        if (_geigerUiState.rfidGeigerState != RfidGeigerState.Setup) {
+            runCatching {
+                getSelectedFileData()
+                connectReader()
+            }.onFailure { exception ->
+                handleError("setupSearch", exception)
+            }
+        }
+    }
+
+    private fun getSelectedFileData() {
+        _geigerUiState.fileData = excelUtils.readSpecificExcelFile(_geigerUiState.selectedFileName)
+        updateGeigerState(rfidGeigerState = RfidGeigerState.Setup)
     }
 
     private fun connectReader() {
@@ -97,7 +117,7 @@ class InventoryViewModel @Inject constructor(
             configureTrigger(rfidReader)
             configureEvents(rfidReader)
         }.onSuccess {
-            updateInventoryState(rfidState = RfidState.Start)
+            updateGeigerState(rfidGeigerState = RfidGeigerState.Ready)
             Log.i("RFID_configureReader", "✅ RFID reader configured and ready!")
         }.onFailure { exception ->
             handleError("RFID_configureReader", exception)
@@ -136,112 +156,62 @@ class InventoryViewModel @Inject constructor(
         }
     }
 
-    private fun updateInventoryState(rfidState: RfidState) {
-        viewModelScope.launch {
-            _inventoryUiState.rfidState = rfidState
-            Log.d("RFID_updateInventoryState", "🔵 Status: ${rfidState.name}")
-        }
-    }
-
-    fun performInventory() {
-        if (_inventoryUiState.rfidState != RfidState.Reading &&
-            _inventoryUiState.rfidState != RfidState.Stop
+    fun performGeiger() {
+        if (_geigerUiState.rfidGeigerState != RfidGeigerState.Reading &&
+            _geigerUiState.rfidGeigerState != RfidGeigerState.Stop
         ) {
             runCatching {
-                performInventoryRead()
+                performMultiTagLocate()
             }.onFailure { exception ->
-                handleError("RFID_performInventory", exception)
+                handleError("RFID_performGeiger", exception)
             }
         }
     }
 
-    private fun performInventoryRead() {
-        val tagAccess = TagAccess()
-        val readAccessParams = tagAccess.ReadAccessParams().apply {
-            accessPassword = 0
-            memoryBank = MEMORY_BANK.MEMORY_BANK_USER
-            if (_inventoryUiState.isDevelopMode) {
-                /* In developer mode (DevelopMode), we use count = 8 because:
-                8 nibbles correspond to 32 hexadecimal characters.
-                32 hexadecimal characters convert to 16 alphanumeric VIN characters.
-                Test tags only support 128-bit, which means a maximum of 32 hexadecimal characters.
-                If we try to read more characters from a 128-bit tag, the read operation will fail.*/
-                count = 8
-                offset = 0
-            } else {
-                /* In normal mode, we use count = 9 because:
-                9 nibbles correspond to 36 hexadecimal characters.
-                36 hexadecimal characters convert to 18 alphanumeric VIN characters.
-                Real tags are 256-bit, allowing up to 64 hexadecimal characters.*/
-                count = 9
-                offset = 4
-            }
-        }
-        updateInventoryState(rfidState = RfidState.Reading)
-        rfidReader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
+    private fun performMultiTagLocate() {
+        multiTagSetup()
+        updateGeigerState(rfidGeigerState = RfidGeigerState.Reading)
+        rfidReader?.Actions?.MultiTagLocate?.perform()
     }
 
-    fun pauseInventory() {
-        if (_inventoryUiState.rfidState != RfidState.Pause) {
+    private fun multiTagSetup() {
+        val multiTagLocateTagMap = ArrayMap<String, String>().apply {
+            _geigerUiState.fileData.forEach { tag ->
+                put(tag.tagID, "-50")
+            }
+        }
+        runCatching {
+            rfidReader?.Actions?.MultiTagLocate?.purgeItemList()
+            rfidReader?.Actions?.MultiTagLocate?.importItemList(multiTagLocateTagMap)
+        }.onFailure { exception ->
+            handleError("RFID_multiTagSetup", exception)
+        }
+    }
+
+    fun pauseGeiger() {
+        if (_geigerUiState.rfidGeigerState != RfidGeigerState.Pause) {
             runCatching {
-                pauseInventoryRead()
+                pauseMultiTagLocate()
             }.onFailure { exception ->
-                handleError("RFID_pauseInventory", exception)
+                handleError("RFID_pauseGeiger", exception)
             }
         }
     }
 
-    private fun pauseInventoryRead() {
-        updateInventoryState(rfidState = RfidState.Pause)
-        rfidReader?.Actions?.TagAccess?.stopAccess()
+    private fun pauseMultiTagLocate() {
+        updateGeigerState(rfidGeigerState = RfidGeigerState.Pause)
+        rfidReader?.Actions?.MultiTagLocate?.stop()
     }
 
-    fun stopInventory() {
-        if (_inventoryUiState.rfidState != RfidState.Stop) {
-            runCatching {
-                stopInventorySession()
-            }.onFailure { exception ->
-                handleError("RFID_stopInventory", exception)
-            }
+    fun retrySetupReader() {
+        setupGeiger()
+    }
+
+    private fun updateGeigerState(rfidGeigerState: RfidGeigerState) {
+        viewModelScope.launch {
+            _geigerUiState.rfidGeigerState = rfidGeigerState
+            Log.d("RFID_updateGeigerState", "🔵 Status: ${rfidGeigerState.name}")
         }
-    }
-
-    private fun stopInventorySession() {
-        excelUtils.writeExcelFile(_inventoryUiState.scannedTags, "Demo")
-        _inventoryUiState.filesList = excelUtils.indexExcelFiles("Demo")
-        updateInventoryState(rfidState = RfidState.Stop)
-    }
-
-    fun openFileDialog(file: String) {
-        _inventoryUiState.selectedFileName = file
-        _inventoryUiState.fileData = excelUtils.readSpecificExcelFile(file)
-        _inventoryUiState.isFileDialogVisible = true
-    }
-
-    fun closeFileDialog() {
-        _inventoryUiState.isFileDialogVisible = false
-    }
-
-    fun resetInventoryState() {
-        if (_inventoryUiState.rfidState != RfidState.Start) {
-            runCatching {
-                resetInventory()
-            }.onFailure { exception ->
-                handleError("RFID_resetInventory", exception)
-            }
-        }
-    }
-
-    private fun resetInventory() {
-        _scannedTagsList.clear()
-        _inventoryUiState.scannedTags = emptyList()
-        _inventoryUiState.filesList = emptyList()
-        updateInventoryState(rfidState = RfidState.Start)
-    }
-
-    fun retryReaderConnection() {
-        updateInventoryState(rfidState = RfidState.Connecting)
-        connectReader()
     }
 
     private fun handleError(title: String, exception: Throwable) {
@@ -251,7 +221,7 @@ class InventoryViewModel @Inject constructor(
             is OperationFailureException -> "⚠️ OperationFailure: ${exception.vendorMessage}"
             else -> "⚠️ Unexpected error: ${exception.message}"
         }
-        updateInventoryState(rfidState = RfidState.Error)
+        updateGeigerState(rfidGeigerState = RfidGeigerState.Error)
         Log.e(title, message)
     }
 
@@ -272,42 +242,10 @@ class InventoryViewModel @Inject constructor(
     inner class EventHandler : RfidEventsListener {
 
         override fun eventReadNotify(e: RfidReadEvents?) {
-            rfidReader?.Actions?.getReadTags(100)?.forEach { tag ->
-
-                if (_scannedTagsList.none { it.tagID == tag.tagID }) {
-
-                    val repuve = conversionUtils.convert(tag.tagID.take(16))
-                    val vin = conversionUtils.convert(tag.memoryBankData.take(34))
-                    val tagID = tag.tagID
-
-                    if (repuve == null || vin == null) {
-                        Log.e(
-                            "RFID_eventReadNotify",
-                            "⚠️ Conversion failed (repuve=$repuve, vin=$vin)"
-                        )
-                        return@forEach
-                    }
-
-                    if (repuve.all { it.isDigit() } && vin.all { it.isLetterOrDigit() }) {
-                        val tagData =
-                            RfidData(
-                                tagID = tagID,
-                                repuve = repuve,
-                                vin = vin
-                            )
-                        Log.d(
-                            "RFID_eventReadNotify",
-                            "Tag Data Info: ${tagData.repuve} - ${tagData.vin}"
-                        )
-                        _scannedTagsList.add(tagData)
-                        _inventoryUiState.scannedTags =
-                            _scannedTagsList.toList().distinctBy { it.repuve }.reversed()
-                    } else {
-                        Log.e(
-                            "RFID_eventReadNotify",
-                            "⚠️ Invalid tag ignored (repuve=$repuve, vin=$vin)"
-                        )
-                    }
+            val myTags: Array<TagData>? = rfidReader?.Actions?.getMultiTagLocateTagInfo(100)
+            myTags?.forEach { tagData ->
+                if (tagData.isContainsMultiTagLocateInfo) {
+                    Log.d("RFID_eventReadNotify", "${tagData.tagID} ${tagData.MultiTagLocateInfo.relativeDistance}")
                 }
             }
         }
@@ -325,7 +263,7 @@ class InventoryViewModel @Inject constructor(
                     when (handheldEvent) {
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED -> {
                             try {
-                                performInventory()
+                                //performInventory()
                             } catch (e: Exception) {
                                 Log.e(
                                     "RFID_eventStatusNotify",
@@ -336,7 +274,7 @@ class InventoryViewModel @Inject constructor(
 
                         HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED -> {
                             try {
-                                pauseInventory()
+                                //pauseInventory()
                             } catch (e: Exception) {
                                 Log.e(
                                     "RFID_eventStatusNotify",

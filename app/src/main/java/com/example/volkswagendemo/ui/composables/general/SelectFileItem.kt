@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.search
+package com.example.volkswagendemo.ui.composables.general
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
 
 @Composable
-fun SearchFileItem(
+fun SelectFileItem(
     fileName: String,
     selected: Boolean = false,
     onClickListener: () -> Unit = {}
@@ -66,7 +66,7 @@ fun SearchFileItem(
 @Preview(showBackground = true)
 @Composable
 fun SearchFileItemSelectedPreview() {
-    SearchFileItem(
+    SelectFileItem(
         fileName = "Taller123 2024-12-18 14:02:00.xls",
         selected = true,
         onClickListener = {}
@@ -76,7 +76,7 @@ fun SearchFileItemSelectedPreview() {
 @Preview(showBackground = true)
 @Composable
 fun SearchFileItemPreview() {
-    SearchFileItem(
+    SelectFileItem(
         fileName = "Taller123 2024-12-18 14:02:00.xls",
         selected = false,
         onClickListener = {}

@@ -14,8 +14,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.Background
-import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.composables.general.Background
+import com.example.volkswagendemo.ui.composables.general.RfidTopBar
 import com.example.volkswagendemo.ui.composables.settings.Settings
 
 @Composable
@@ -24,7 +24,7 @@ fun SettingsScreen(
 ) {
     Scaffold(
         topBar = {
-            InventoryTopBar(
+            RfidTopBar(
                 title = "Configuraciones",
                 onNavigationBack = { navigateToHome() },
             )

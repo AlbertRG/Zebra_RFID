@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.Background
+import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.dialog.WorkshopDialog
 import com.example.volkswagendemo.ui.composables.dialog.LocationDialog
 import com.example.volkswagendemo.ui.composables.home.BottomSheet
@@ -31,6 +31,7 @@ fun HomeScreen(
     locationViewModel: LocationViewModel,
     navigateToInventory: () -> Unit,
     navigateToSearch: () -> Unit,
+    navigateToGeiger: () -> Unit,
     navigateToBattery: () -> Unit,
     navigateToSettings: () -> Unit
 ) {
@@ -67,7 +68,8 @@ fun HomeScreen(
             HomeColumn(
                 homeViewModel,
                 locationViewModel,
-                navigateToSearch
+                navigateToSearch,
+                navigateToGeiger
             )
         }
 

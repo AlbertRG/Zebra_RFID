@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.ui.composables.search
+package com.example.volkswagendemo.ui.composables.geiger
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,15 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.general.SelectFileItem
 import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
-import com.example.volkswagendemo.viewmodel.SearchViewModel
+import com.example.volkswagendemo.ui.composables.general.SelectFileItem
+import com.example.volkswagendemo.viewmodel.GeigerViewModel
 
 @Composable
-fun SearchFiles(
-    searchViewModel: SearchViewModel
+fun GeigerFiles(
+    geigerViewModel: GeigerViewModel
 ) {
-    val searchUiState = searchViewModel.searchUiState
+    val geigerUiState = geigerViewModel.geigerUiState
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,18 +33,18 @@ fun SearchFiles(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(searchUiState.filesList) { file ->
+            items(geigerUiState.filesList) { file ->
                 SelectFileItem(
                     fileName = file,
-                    selected = file == searchUiState.selectedFileName,
-                    onClickListener = { searchViewModel.selectFile(file) }
+                    selected = file == geigerUiState.selectedFileName,
+                    onClickListener = { geigerViewModel.selectFile(file) }
                 )
             }
         }
         RfidBottomBar(
             isDualMode = false,
             title = stringResource(R.string.inventory_button_start),
-            onClickListener = { searchViewModel.setupSearch() },
+            onClickListener = { geigerViewModel.setupGeiger() },
             title2 = "",
             onClickListener2 = { }
         )

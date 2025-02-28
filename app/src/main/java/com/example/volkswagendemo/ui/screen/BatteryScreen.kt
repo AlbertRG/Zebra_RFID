@@ -14,11 +14,11 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.Background
-import com.example.volkswagendemo.ui.composables.battery.BatteryConnecting
 import com.example.volkswagendemo.ui.composables.battery.BatteryError
 import com.example.volkswagendemo.ui.composables.battery.BatteryInfo
-import com.example.volkswagendemo.ui.composables.inventory.InventoryTopBar
+import com.example.volkswagendemo.ui.composables.general.Background
+import com.example.volkswagendemo.ui.composables.general.RfidLoading
+import com.example.volkswagendemo.ui.composables.general.RfidTopBar
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
 
 @Composable
@@ -31,7 +31,7 @@ fun BatteryScreen(
 
     Scaffold(
         topBar = {
-            InventoryTopBar(
+            RfidTopBar(
                 title = stringResource(R.string.battery_title),
                 onNavigationBack = { navigateToHome() },
             )
@@ -53,7 +53,7 @@ fun BatteryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when {
-                    batteryUiState.isConnecting -> BatteryConnecting()
+                    batteryUiState.isConnecting -> RfidLoading()
                     batteryUiState.isConnected -> BatteryInfo(batteryViewModel)
                     batteryUiState.hasError -> BatteryError(batteryViewModel)
                 }
