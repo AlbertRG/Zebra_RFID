@@ -62,7 +62,11 @@ fun SearchPause(
             items(searchUiState.fileData) { tag ->
                 RfidCard(
                     repuve = tag.repuve,
-                    vin = tag.vin
+                    vin = tag.vin,
+                    isClickable = true,
+                    onClickListener = { searchViewModel.setupGeiger(data = tag) },
+                    isSelected = tag.tagID == searchUiState.selectedTag.tagID,
+                    distance = searchUiState.relativeDistance
                 )
             }
         }

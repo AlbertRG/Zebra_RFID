@@ -40,7 +40,7 @@ private val EXTENDED_ASCII_CHAR = charArrayOf(
 
 class ConversionUtils @Inject constructor() {
 
-    fun convert(tag: String): String? {
+    fun hexToAscii(tag: String): String? {
         return hex2ascii(tag)
     }
 
@@ -81,6 +81,16 @@ class ConversionUtils @Inject constructor() {
             in '0'..'9' -> ch - '0'
             else -> throw IllegalArgumentException(ch.toString())
         }
+    }
+
+    fun AsciiToHex(tag: String): String {
+        val trimmedData = tag.substring(1, tag.length - 1)
+        val bytes = trimmedData.toByteArray()
+        val builder = StringBuilder()
+        for (c in bytes) {
+            builder.append(c.toInt().toString(16))
+        }
+        return builder.toString()
     }
 
 }

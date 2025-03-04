@@ -64,6 +64,7 @@ class SearchViewModel @Inject constructor(
     fun setupSearch() {
         if (_searchUiState.rfidSearchState != RfidSearchState.Setup) {
             runCatching {
+                updateSearchState(rfidSearchState = RfidSearchState.Setup)
                 getSelectedFileData()
                 connectReader()
             }.onFailure { exception ->
@@ -74,7 +75,6 @@ class SearchViewModel @Inject constructor(
 
     private fun getSelectedFileData() {
         _searchUiState.fileData = excelUtils.readSpecificExcelFile(_searchUiState.selectedFileName)
-        updateSearchState(rfidSearchState = RfidSearchState.Setup)
     }
 
     private fun connectReader() {
@@ -160,11 +160,13 @@ class SearchViewModel @Inject constructor(
     }
 
     fun performInventory() {
-        if (_searchUiState.rfidSearchState == RfidSearchState.Ready ||
-            _searchUiState.rfidSearchState == RfidSearchState.Pause
+        if ((_searchUiState.rfidSearchState == RfidSearchState.Ready ||
+                    _searchUiState.rfidSearchState == RfidSearchState.Pause) &&
+            !_searchUiState.isGeigerWorking
         ) {
             runCatching {
                 performInventoryRead()
+                updateSearchState(rfidSearchState = RfidSearchState.Reading)
             }.onFailure { exception ->
                 handleError("RFID_performInventory", exception)
             }
@@ -193,14 +195,14 @@ class SearchViewModel @Inject constructor(
                 offset = 4
             }
         }
-        updateSearchState(rfidSearchState = RfidSearchState.Reading)
         rfidReader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
     }
 
     fun pauseInventory() {
-        if (_searchUiState.rfidSearchState == RfidSearchState.Reading) {
+        if (_searchUiState.rfidSearchState == RfidSearchState.Reading && !_searchUiState.isGeigerWorking) {
             runCatching {
                 pauseInventoryRead()
+                updateSearchState(rfidSearchState = RfidSearchState.Pause)
             }.onFailure { exception ->
                 handleError("RFID_pauseInventory", exception)
             }
@@ -208,8 +210,22 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun pauseInventoryRead() {
-        updateSearchState(rfidSearchState = RfidSearchState.Pause)
         rfidReader?.Actions?.TagAccess?.stopAccess()
+    }
+
+    fun setupGeiger(data: RfidData) {
+        if (_searchUiState.selectedTag.tagID == data.tagID) {
+            _searchUiState.selectedTag = RfidData("", "", "")
+            rfidReader?.Actions?.TagLocationing?.Stop()
+            rfidReader?.Events?.setAttachTagDataWithReadEvent(true)
+            _searchUiState.isGeigerWorking = false
+        } else {
+            _searchUiState.isGeigerWorking = true
+            rfidReader?.Actions?.TagLocationing?.Stop()
+            _searchUiState.selectedTag = data
+            rfidReader?.Events?.setAttachTagDataWithReadEvent(false)
+            rfidReader?.Actions?.TagLocationing?.Perform(data.tagID, null, null)
+        }
     }
 
     fun retrySetupReader() {
@@ -252,11 +268,13 @@ class SearchViewModel @Inject constructor(
 
         override fun eventReadNotify(e: RfidReadEvents?) {
             rfidReader?.Actions?.getReadTags(100)?.forEach { tag ->
-
+                if (tag.isContainsLocationInfo) {
+                    _searchUiState.relativeDistance = tag.LocationInfo.relativeDistance.toInt()
+                }
                 if (_scannedTagsList.none { it.tagID == tag.tagID }) {
 
-                    val repuve = conversionUtils.convert(tag.tagID.take(16))
-                    val vin = conversionUtils.convert(tag.memoryBankData.take(34))
+                    val repuve = conversionUtils.hexToAscii(tag.tagID.take(16))
+                    val vin = conversionUtils.hexToAscii(tag.memoryBankData.take(34))
                     val tagID = tag.tagID
 
                     if (repuve == null || vin == null) {

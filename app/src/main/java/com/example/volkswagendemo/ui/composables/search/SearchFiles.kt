@@ -45,6 +45,7 @@ fun SearchFiles(
             isDualMode = false,
             title = stringResource(R.string.inventory_button_start),
             onClickListener = { searchViewModel.setupSearch() },
+            isButtonEnable = searchUiState.selectedFileName.isNotEmpty(),
             title2 = "",
             onClickListener2 = { }
         )

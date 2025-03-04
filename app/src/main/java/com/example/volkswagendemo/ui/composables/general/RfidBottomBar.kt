@@ -24,6 +24,7 @@ fun RfidBottomBar(
     isDualMode: Boolean,
     title: String,
     onClickListener: (() -> Unit),
+    isButtonEnable: Boolean = true,
     title2: String,
     onClickListener2: (() -> Unit),
 ) {
@@ -63,7 +64,8 @@ fun RfidBottomBar(
                     .padding(
                         vertical = 16.dp,
                         horizontal = 8.dp
-                    ),
+                    )
+                ,enabled = isButtonEnable,
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_red))
             ) {
                 Text(

@@ -31,7 +31,6 @@ fun HomeScreen(
     locationViewModel: LocationViewModel,
     navigateToInventory: () -> Unit,
     navigateToSearch: () -> Unit,
-    navigateToGeiger: () -> Unit,
     navigateToBattery: () -> Unit,
     navigateToSettings: () -> Unit
 ) {
@@ -68,8 +67,7 @@ fun HomeScreen(
             HomeColumn(
                 homeViewModel,
                 locationViewModel,
-                navigateToSearch,
-                navigateToGeiger
+                navigateToSearch
             )
         }
 

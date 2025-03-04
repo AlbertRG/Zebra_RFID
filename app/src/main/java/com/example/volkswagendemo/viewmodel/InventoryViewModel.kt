@@ -276,8 +276,8 @@ class InventoryViewModel @Inject constructor(
 
                 if (_scannedTagsList.none { it.tagID == tag.tagID }) {
 
-                    val repuve = conversionUtils.convert(tag.tagID.take(16))
-                    val vin = conversionUtils.convert(tag.memoryBankData.take(34))
+                    val repuve = conversionUtils.hexToAscii(tag.tagID.take(16))
+                    val vin = conversionUtils.hexToAscii(tag.memoryBankData.take(34))
                     val tagID = tag.tagID
 
                     if (repuve == null || vin == null) {
