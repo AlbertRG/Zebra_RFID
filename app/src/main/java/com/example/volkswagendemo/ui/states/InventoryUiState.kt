@@ -24,7 +24,7 @@ class MutableInventoryUiState() : InventoryUiState {
     override var filesList: List<String> by mutableStateOf(emptyList())
     override var selectedFileName: String by mutableStateOf("")
     override var fileData: List<RfidData> by mutableStateOf(emptyList())
-    override val isDevelopMode: Boolean by mutableStateOf(false)
+    override val isDevelopMode: Boolean by mutableStateOf(true)
     override val isLocationSaved: Boolean by mutableStateOf(false)
     override var isFileDialogVisible: Boolean by mutableStateOf(false)
 }

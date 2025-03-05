@@ -27,6 +27,7 @@ fun RfidBottomBar(
     isButtonEnable: Boolean = true,
     title2: String,
     onClickListener2: (() -> Unit),
+    isButtonEnable2: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -49,6 +50,7 @@ fun RfidBottomBar(
                             vertical = 16.dp,
                             horizontal = 8.dp
                         ),
+                    enabled = isButtonEnable2,
                     colors = ButtonDefaults.buttonColors(colorResource(R.color.secondary_red))
                 ) {
                     Text(

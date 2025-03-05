@@ -74,8 +74,10 @@ fun SearchPause(
             isDualMode = true,
             title = stringResource(R.string.inventory_button_continue),
             onClickListener = { searchViewModel.performInventory() },
+            isButtonEnable = !searchUiState.isGeigerWorking,
             title2 = stringResource(R.string.inventory_button_stop),
-            onClickListener2 = { /*searchViewModel.stopInventory()*/ }
+            onClickListener2 = { /*searchViewModel.stopInventory()*/ },
+            isButtonEnable2 = !searchUiState.isGeigerWorking
         )
     }
 }

@@ -160,9 +160,8 @@ class SearchViewModel @Inject constructor(
     }
 
     fun performInventory() {
-        if ((_searchUiState.rfidSearchState == RfidSearchState.Ready ||
-                    _searchUiState.rfidSearchState == RfidSearchState.Pause) &&
-            !_searchUiState.isGeigerWorking
+        if (_searchUiState.rfidSearchState == RfidSearchState.Ready ||
+            _searchUiState.rfidSearchState == RfidSearchState.Pause
         ) {
             runCatching {
                 performInventoryRead()
@@ -199,7 +198,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun pauseInventory() {
-        if (_searchUiState.rfidSearchState == RfidSearchState.Reading && !_searchUiState.isGeigerWorking) {
+        if (_searchUiState.rfidSearchState == RfidSearchState.Reading) {
             runCatching {
                 pauseInventoryRead()
                 updateSearchState(rfidSearchState = RfidSearchState.Pause)
