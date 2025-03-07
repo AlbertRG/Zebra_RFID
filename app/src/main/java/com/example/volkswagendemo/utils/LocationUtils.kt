@@ -11,7 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.example.volkswagendemo.data.LocationData
+import com.example.volkswagendemo.data.models.LocationData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.coroutines.suspendCoroutine
 
 class LocationUtils @Inject constructor(private val context: Context) {
 
@@ -103,33 +104,35 @@ class LocationUtils @Inject constructor(private val context: Context) {
         }
     }
 
-    fun reverseGeocodeLocation(location: LocationData, callback: (String) -> Unit) {
-        if (location.latitude == 0.0 && location.longitude == 0.0) {
-            val errorMsg = "⚠️ Invalid location: lat=0.0, lng=0.0"
-            Log.e("LocationUtils", errorMsg)
-            callback(errorMsg)
-            return
+    suspend fun reverseGeocodeLocation(location: LocationData): String {
+        return suspendCoroutine { continuation ->
+            if (location.latitude == 0.0 && location.longitude == 0.0) {
+                val errorMsg = "⚠️ Invalid location: lat=0.0, lng=0.0"
+                Log.e("LocationUtils", errorMsg)
+                continuation.resumeWith(Result.success(errorMsg)) // Regresamos el error
+                return@suspendCoroutine
+            }
+
+            val geocoder = Geocoder(context, Locale.getDefault())
+            geocoder.getFromLocation(
+                location.latitude,
+                location.longitude,
+                1,
+                object : Geocoder.GeocodeListener {
+                    override fun onGeocode(addresses: MutableList<Address>) {
+                        val address =
+                            addresses.firstOrNull()?.getAddressLine(0) ?: "Dirección no encontrada"
+                        Log.d("LocationUtils", "✅ Successful geocoding: $address")
+                        continuation.resumeWith(Result.success(address)) // Regresamos la dirección
+                    }
+
+                    override fun onError(errorMessage: String?) {
+                        val errorMsg = "⚠️ Error getting the address: $errorMessage"
+                        Log.e("LocationUtils", errorMsg)
+                        continuation.resumeWith(Result.success(errorMsg)) // Regresamos el error
+                    }
+                })
         }
-
-        val geocoder = Geocoder(context, Locale.getDefault())
-        geocoder.getFromLocation(
-            location.latitude,
-            location.longitude,
-            1,
-            object : Geocoder.GeocodeListener {
-                override fun onGeocode(addresses: MutableList<Address>) {
-                    val address =
-                        addresses.firstOrNull()?.getAddressLine(0) ?: "Dirección no encontrada"
-                    Log.d("LocationUtils", "✅ Successful geocoding: $address")
-                    callback(address)
-                }
-
-                override fun onError(errorMessage: String?) {
-                    val errorMsg = "⚠️ Error getting the address: $errorMessage"
-                    Log.e("LocationUtils", errorMsg)
-                    callback(errorMsg)
-                }
-            })
     }
 
 }

@@ -12,9 +12,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.volkswagendemo.data.LocationData
+import com.example.volkswagendemo.data.models.LocationData
 
 @Composable
 fun LocationInfo(
@@ -61,4 +62,10 @@ fun LocationInfo(
             fontWeight = FontWeight.Normal
         )
     }
+}
+
+@Preview (showBackground = true)
+@Composable
+fun LocationInfoPreview() {
+    LocationInfo(LocationData(0.0,0.0), "Address")
 }

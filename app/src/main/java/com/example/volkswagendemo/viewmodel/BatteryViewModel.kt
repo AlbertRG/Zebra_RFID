@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.ui.states.BatteryUiState
 import com.example.volkswagendemo.ui.states.MutableBatteryUiState
+import com.example.volkswagendemo.ui.states.RfidBatteryState
 import com.zebra.rfid.api3.BatteryStatistics
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.InvalidUsageException
@@ -37,14 +38,8 @@ class BatteryViewModel @Inject constructor(
     }
 
     fun retryConnection() {
-        resetState()
+        updateBatteryState(rfidBatteryState = RfidBatteryState.Connecting)
         connectReader()
-    }
-
-    private fun resetState() {
-        _batteryUiState.isConnecting = true
-        _batteryUiState.isConnected = false
-        _batteryUiState.hasError = false
     }
 
     private fun connectReader() {
@@ -95,11 +90,17 @@ class BatteryViewModel @Inject constructor(
             _batteryUiState.cycleCount = batteryStats.cycleCount
             _batteryUiState.percentage = batteryStats.percentage
             _batteryUiState.temperature = batteryStats.temperature
-            _batteryUiState.isConnecting = false
-            _batteryUiState.isConnected = true
+            updateBatteryState(rfidBatteryState = RfidBatteryState.Ready)
         }.onFailure { exception ->
             Log.e("RFID_fetchBatteryStats", "⚠️ Error in obtaining battery information")
             handleException(exception)
+        }
+    }
+
+    private fun updateBatteryState(rfidBatteryState: RfidBatteryState) {
+        viewModelScope.launch {
+            _batteryUiState.batteryState = rfidBatteryState
+            Log.d("RFID_updateBatteryState", "🔵 Status: ${rfidBatteryState.name}")
         }
     }
 
@@ -111,8 +112,7 @@ class BatteryViewModel @Inject constructor(
             is NullPointerException -> "⚠️ Null pointer exception: ${exception.message}"
             else -> "⚠️ Unexpected error: ${exception.message}"
         }
-        _batteryUiState.isConnecting = false
-        _batteryUiState.hasError = true
+        updateBatteryState(rfidBatteryState = RfidBatteryState.Error)
         Log.e("RFID_handleException", message)
     }
 

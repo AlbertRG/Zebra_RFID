@@ -11,19 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.dialog.FileDialog
+import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.general.RfidLoading
+import com.example.volkswagendemo.ui.composables.general.RfidTopBar
 import com.example.volkswagendemo.ui.composables.inventory.InventoryError
 import com.example.volkswagendemo.ui.composables.inventory.InventoryPause
 import com.example.volkswagendemo.ui.composables.inventory.InventoryReading
 import com.example.volkswagendemo.ui.composables.inventory.InventoryStart
 import com.example.volkswagendemo.ui.composables.inventory.InventoryStop
-import com.example.volkswagendemo.ui.composables.general.RfidTopBar
-import com.example.volkswagendemo.ui.states.RfidState
+import com.example.volkswagendemo.ui.states.RfidInventoryState
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable
@@ -35,16 +34,16 @@ fun InventoryScreen(
     Scaffold(
         topBar = {
             RfidTopBar(
-                title = stringResource(R.string.inventory_title),
+                title = inventoryUiState.workshop,
                 onNavigationBack = { navigateToHome() },
                 iconAction = {
                     when (inventoryUiState.rfidState) {
-                        RfidState.Connecting -> {}
-                        RfidState.Start -> {}
-                        RfidState.Reading -> {}
-                        RfidState.Pause -> {}
-                        RfidState.Stop -> {}
-                        RfidState.Error -> {}
+                        RfidInventoryState.Connecting -> {}
+                        RfidInventoryState.Ready -> {}
+                        RfidInventoryState.Reading -> {}
+                        RfidInventoryState.Pause -> {}
+                        RfidInventoryState.Stop -> {}
+                        RfidInventoryState.Error -> {}
                     }
                 }
             )
@@ -63,12 +62,12 @@ fun InventoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (inventoryUiState.rfidState) {
-                    RfidState.Connecting -> RfidLoading()
-                    RfidState.Start -> InventoryStart(inventoryViewModel)
-                    RfidState.Reading -> InventoryReading(inventoryViewModel)
-                    RfidState.Pause -> InventoryPause(inventoryViewModel)
-                    RfidState.Stop -> InventoryStop(inventoryViewModel)
-                    RfidState.Error -> InventoryError(inventoryViewModel)
+                    RfidInventoryState.Connecting -> RfidLoading()
+                    RfidInventoryState.Ready -> InventoryStart(inventoryViewModel)
+                    RfidInventoryState.Reading -> InventoryReading(inventoryViewModel)
+                    RfidInventoryState.Pause -> InventoryPause(inventoryViewModel)
+                    RfidInventoryState.Stop -> InventoryStop(inventoryViewModel)
+                    RfidInventoryState.Error -> InventoryError(inventoryViewModel)
                 }
             }
         }

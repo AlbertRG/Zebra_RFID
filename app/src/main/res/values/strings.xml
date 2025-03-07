@@ -8,6 +8,8 @@
     <string name="error_connecting_hint">Verifica la conexión con el lector RFID</string>
 
     <!--LocationDialog-->
+    <string name="location_title">Localizacion</string>
+    <string name="internet_error_title">Sin conexión</string>">
     <string name="internet_error">Por favor verifica tu conexión a internet</string>
 
     <!--InventoryScreen-->

@@ -3,7 +3,11 @@ package com.example.volkswagendemo.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.volkswagendemo.data.LocationData
+import com.example.volkswagendemo.data.models.LocationData
+import com.example.volkswagendemo.domain.usecase.location.SetAddressUseCase
+import com.example.volkswagendemo.domain.usecase.location.SetLocationSavedUseCase
+import com.example.volkswagendemo.domain.usecase.location.SetLocationUseCase
+import com.example.volkswagendemo.ui.states.LocationState
 import com.example.volkswagendemo.ui.states.LocationUiState
 import com.example.volkswagendemo.ui.states.MutableLocationUiState
 import com.example.volkswagendemo.utils.LocationUtils
@@ -13,15 +17,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val locationUtils: LocationUtils
+    private val locationUtils: LocationUtils,
+    private val setLocationSavedUseCase: SetLocationSavedUseCase,
+    private val setLocationUseCase: SetLocationUseCase,
+    private val setAddressUseCase: SetAddressUseCase
 ) : ViewModel() {
 
     private val _locationUiState = MutableLocationUiState()
     val locationUiState: LocationUiState = _locationUiState
-
-    fun hasLocationPermission(): Boolean {
-        return locationUtils.hasLocationPermission()
-    }
 
     fun setLocationShowing(status: Boolean) {
         viewModelScope.launch {
@@ -30,22 +33,19 @@ class LocationViewModel @Inject constructor(
         }
     }
 
+    fun hasLocationPermission(): Boolean {
+        return locationUtils.hasLocationPermission()
+    }
+
     fun initLocation() {
-        resetState()
-        _locationUiState.isLoading = true
         if (locationUtils.isInternetAvailable()) {
             viewModelScope.launch {
+                _locationUiState.locationState = LocationState.Loading
                 requestLocationUpdate()
             }
         } else {
-            _locationUiState.isInternetError = true
+            _locationUiState.locationState = LocationState.InternetError
         }
-    }
-
-    private fun resetState() {
-        _locationUiState.isLoading = false
-        _locationUiState.hasError = false
-        _locationUiState.isInternetError = false
     }
 
     private fun requestLocationUpdate() {
@@ -53,10 +53,12 @@ class LocationViewModel @Inject constructor(
             locationUtils.requestLocation()
                 .collect { newLocation: Pair<LocationData, String> ->
                     if (newLocation.first.latitude == 0.0 || newLocation.first.longitude == 0.0) {
-                        _locationUiState.hasError = true
                         _locationUiState.message = newLocation.second
+                        _locationUiState.locationState = LocationState.Error
                     } else {
                         _locationUiState.location = newLocation.first
+                        setLocationSavedUseCase(true)
+                        setLocationUseCase(_locationUiState.location)
                         reverseGeocodeLocation(newLocation.first)
                     }
                 }
@@ -64,9 +66,14 @@ class LocationViewModel @Inject constructor(
     }
 
     private fun reverseGeocodeLocation(location: LocationData) {
-        locationUtils.reverseGeocodeLocation(location) { result ->
-            _locationUiState.address = result
-            _locationUiState.isLoading = false
+        viewModelScope.launch {
+            runCatching {
+                _locationUiState.address = locationUtils.reverseGeocodeLocation(location)
+                setAddressUseCase(_locationUiState.address)
+                _locationUiState.locationState = LocationState.Success
+            }.onFailure {
+                _locationUiState.locationState = LocationState.Error
+            }
         }
     }
 

@@ -18,21 +18,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.data.LocationData
 import com.example.volkswagendemo.viewmodel.HomeViewModel
 
 @Composable
@@ -40,13 +36,9 @@ fun WorkshopDialog(
     homeViewModel: HomeViewModel,
     navigateToInventory: () -> Unit
 ) {
-
-    var openDialog by remember { mutableStateOf(true) }
-    var workshop by remember { mutableStateOf("") }
-    val isLocationSave by remember { mutableStateOf(false) }
-
+    val homeUiState = homeViewModel.homeUiStates
     Dialog(
-        onDismissRequest = { openDialog = false },
+        onDismissRequest = { homeViewModel.closeWorkshopDialog { } },
         properties = DialogProperties(
             dismissOnBackPress = false,
             dismissOnClickOutside = false
@@ -84,8 +76,8 @@ fun WorkshopDialog(
                     fontWeight = FontWeight.Normal
                 )
                 OutlinedTextField(
-                    value = workshop,
-                    onValueChange = { newText -> workshop = newText },
+                    value = homeUiState.workshop.trim(),
+                    onValueChange = { newText -> homeUiState.workshop = newText },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -98,7 +90,7 @@ fun WorkshopDialog(
                         focusedLabelColor = colorResource(R.color.primary_red)
                     )
                 )
-                if (isLocationSave) {
+                if (homeUiState.isLocationSaved) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -106,15 +98,15 @@ fun WorkshopDialog(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Localizacion",
+                            text = stringResource(R.string.location_title),
                             modifier = Modifier
                                 .padding(bottom = 8.dp),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
                         LocationInfo(
-                            location = LocationData(0.0, 0.0),
-                            address = "Industria Zapatera 124, Zapopan Industrial Nte., 45130 Zapopan, Jal."
+                            location = homeUiState.location,
+                            address = homeUiState.address
                         )
                     }
                 }
@@ -125,7 +117,7 @@ fun WorkshopDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            homeViewModel.setWorkshopShowing(false)
+                            homeViewModel.closeWorkshopDialog { }
                         }
                     ) {
                         Text(
@@ -136,12 +128,13 @@ fun WorkshopDialog(
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(
                         onClick = {
-                            homeViewModel.setWorkshopShowing(false)
-                            navigateToInventory()
-                        }) {
+                            homeViewModel.closeWorkshopDialog(navigateToInventory)
+                        },
+                        enabled = homeUiState.workshop.isNotBlank()
+                    ) {
                         Text(
-                            text = "Aceptar",
-                            color = if (workshop.none()) {
+                            text = stringResource(R.string.button_accept),
+                            color = if (homeUiState.workshop.isBlank()) {
                                 Color.Gray
                             } else {
                                 Color.Black

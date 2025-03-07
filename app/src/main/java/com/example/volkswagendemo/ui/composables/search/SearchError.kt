@@ -66,7 +66,7 @@ fun SearchError(
             fontSize = 14.sp,
         )
         Button(
-            onClick = { searchViewModel.retrySetupReader() },
+            onClick = { searchViewModel.retrySearch() },
             modifier = Modifier
                 .width(240.dp)
                 .padding(vertical = 24.dp),

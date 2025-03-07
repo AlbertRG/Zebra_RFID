@@ -70,7 +70,6 @@ fun HomeScreen(
                 navigateToSearch
             )
         }
-
     }
 
     if (locationViewModel.locationUiState.isShowing) {

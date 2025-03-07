@@ -19,6 +19,7 @@ import com.example.volkswagendemo.ui.composables.battery.BatteryInfo
 import com.example.volkswagendemo.ui.composables.general.Background
 import com.example.volkswagendemo.ui.composables.general.RfidLoading
 import com.example.volkswagendemo.ui.composables.general.RfidTopBar
+import com.example.volkswagendemo.ui.states.RfidBatteryState
 import com.example.volkswagendemo.viewmodel.BatteryViewModel
 
 @Composable
@@ -26,9 +27,7 @@ fun BatteryScreen(
     batteryViewModel: BatteryViewModel,
     navigateToHome: () -> Unit,
 ) {
-
     val batteryUiState = batteryViewModel.batteryUiState
-
     Scaffold(
         topBar = {
             RfidTopBar(
@@ -52,10 +51,10 @@ fun BatteryScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                when {
-                    batteryUiState.isConnecting -> RfidLoading()
-                    batteryUiState.isConnected -> BatteryInfo(batteryViewModel)
-                    batteryUiState.hasError -> BatteryError(batteryViewModel)
+                when(batteryUiState.batteryState) {
+                    RfidBatteryState.Connecting -> RfidLoading()
+                    RfidBatteryState.Ready -> BatteryInfo(batteryViewModel)
+                    RfidBatteryState.Error -> BatteryError(batteryViewModel)
                 }
             }
         }

@@ -45,7 +45,7 @@ class ConversionUtils @Inject constructor() {
     }
 
     private fun hex2ascii(tagID: String?): String? {
-        if (tagID.isNullOrEmpty()) return tagID ?: ""
+        if (tagID.isNullOrBlank()) return null
 
         val n = tagID.length
         if (n % 2 != 0) return tagID
@@ -83,14 +83,17 @@ class ConversionUtils @Inject constructor() {
         }
     }
 
-    fun AsciiToHex(tag: String): String {
-        val trimmedData = tag.substring(1, tag.length - 1)
-        val bytes = trimmedData.toByteArray()
+    fun asciiToHex(tag: String): String {
+        return ascii2Hex(tag)
+    }
+
+    private fun ascii2Hex(tag: String): String {
+        val bytes = tag.toByteArray()
         val builder = StringBuilder()
         for (c in bytes) {
             builder.append(c.toInt().toString(16))
         }
-        return builder.toString()
+        return builder.toString().take(24).padEnd(24,'0')
     }
 
 }

@@ -4,7 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.volkswagendemo.data.RfidData
+import com.example.volkswagendemo.data.models.RfidData
 import com.example.volkswagendemo.ui.states.MutableSearchUiState
 import com.example.volkswagendemo.ui.states.RfidSearchState
 import com.example.volkswagendemo.utils.ConversionUtils
@@ -62,9 +62,8 @@ class SearchViewModel @Inject constructor(
     }
 
     fun setupSearch() {
-        if (_searchUiState.rfidSearchState != RfidSearchState.Setup) {
+        if (_searchUiState.rfidSearchState == RfidSearchState.Files) {
             runCatching {
-                updateSearchState(rfidSearchState = RfidSearchState.Setup)
                 getSelectedFileData()
                 connectReader()
             }.onFailure { exception ->
@@ -74,7 +73,8 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun getSelectedFileData() {
-        _searchUiState.fileData = excelUtils.readSpecificExcelFile(_searchUiState.selectedFileName)
+        updateSearchState(rfidSearchState = RfidSearchState.Setup)
+        _searchUiState.fileData = excelUtils.readSpecificExcelFile(_searchUiState.selectedFileName, true)
     }
 
     private fun connectReader() {
@@ -165,7 +165,6 @@ class SearchViewModel @Inject constructor(
         ) {
             runCatching {
                 performInventoryRead()
-                updateSearchState(rfidSearchState = RfidSearchState.Reading)
             }.onFailure { exception ->
                 handleError("RFID_performInventory", exception)
             }
@@ -194,6 +193,7 @@ class SearchViewModel @Inject constructor(
                 offset = 4
             }
         }
+        updateSearchState(rfidSearchState = RfidSearchState.Reading)
         rfidReader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
     }
 
@@ -201,7 +201,6 @@ class SearchViewModel @Inject constructor(
         if (_searchUiState.rfidSearchState == RfidSearchState.Reading) {
             runCatching {
                 pauseInventoryRead()
-                updateSearchState(rfidSearchState = RfidSearchState.Pause)
             }.onFailure { exception ->
                 handleError("RFID_pauseInventory", exception)
             }
@@ -209,6 +208,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun pauseInventoryRead() {
+        updateSearchState(rfidSearchState = RfidSearchState.Pause)
         rfidReader?.Actions?.TagAccess?.stopAccess()
     }
 
@@ -227,8 +227,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun retrySetupReader() {
-        setupSearch()
+    fun retrySearch() {
+        getFilesList()
+        updateSearchState(rfidSearchState = RfidSearchState.Files)
     }
 
     private fun updateSearchState(rfidSearchState: RfidSearchState) {
@@ -351,7 +352,5 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
-
     }
-
 }

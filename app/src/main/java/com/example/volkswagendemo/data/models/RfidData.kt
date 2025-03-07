@@ -1,4 +1,4 @@
-package com.example.volkswagendemo.data
+package com.example.volkswagendemo.data.models
 
 data class RfidData(
     val tagID: String,

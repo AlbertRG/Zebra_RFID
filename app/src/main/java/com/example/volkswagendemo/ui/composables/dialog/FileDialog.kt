@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.volkswagendemo.R
-import com.example.volkswagendemo.data.LocationData
+import com.example.volkswagendemo.data.models.LocationData
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 
 @Composable

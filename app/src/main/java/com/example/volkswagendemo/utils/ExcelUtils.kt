@@ -5,14 +5,17 @@ import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
 import android.util.Log
-import com.example.volkswagendemo.data.RfidData
+import com.example.volkswagendemo.data.models.RfidData
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
-class ExcelUtils @Inject constructor(private val context: Context) {
+class ExcelUtils @Inject constructor(
+    private val context: Context,
+    private val conversionUtils: ConversionUtils
+) {
 
     fun writeExcelFile(tagsFlow: List<RfidData>, workshop: String) {
         val timestamp = getActualDate()
@@ -30,9 +33,8 @@ class ExcelUtils @Inject constructor(private val context: Context) {
 
         tagsFlow.forEachIndexed { index, tag ->
             val row = sheet.createRow(index + 3)
-            row.createCell(0).setCellValue(tag.tagID)
-            row.createCell(1).setCellValue(tag.repuve)
-            row.createCell(2).setCellValue(tag.vin)
+            row.createCell(0).setCellValue(tag.repuve)
+            row.createCell(1).setCellValue(tag.vin)
         }
 
         val contentValues = ContentValues().apply {
@@ -90,14 +92,14 @@ class ExcelUtils @Inject constructor(private val context: Context) {
             }
         }
         Log.d("indexExcelFiles", "📂 XLS files found: ${excelFiles.size}")
-        return excelFiles.sorted()
+        return excelFiles.sorted().reversed()
     }
 
-    fun readSpecificExcelFile(fileName: String): List<RfidData> {
-        return readExcelFile(fileName)
+    fun readSpecificExcelFile(fileName: String, isTagIdNeeded: Boolean = false): List<RfidData> {
+        return readExcelFile(fileName, isTagIdNeeded)
     }
 
-    private fun readExcelFile(fileName: String): List<RfidData> {
+    private fun readExcelFile(fileName: String, isTagIdNeeded: Boolean): List<RfidData> {
         val dataList = mutableListOf<RfidData>()
         val projection = arrayOf(MediaStore.Files.FileColumns._ID)
         val selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} = ?"
@@ -121,11 +123,14 @@ class ExcelUtils @Inject constructor(private val context: Context) {
                             for (rowIndex in 3 until sheet.physicalNumberOfRows) {
                                 val row = sheet.getRow(rowIndex)
 
-                                val tagID = row?.getCell(0)?.toString()?.trim() ?: ""
-                                val repuve = row?.getCell(1)?.toString()?.trim() ?: ""
-                                val vin = row?.getCell(2)?.toString()?.trim() ?: ""
+                                val repuve = row?.getCell(0)?.toString()?.trim() ?: ""
+                                val vin = row?.getCell(1)?.toString()?.trim() ?: ""
 
                                 if (vin.isNotEmpty() && repuve.isNotEmpty()) {
+                                    var tagID = ""
+                                    if (isTagIdNeeded) {
+                                        tagID = conversionUtils.asciiToHex(repuve)
+                                    }
                                     dataList.add(RfidData(tagID = tagID, repuve = repuve, vin = vin))
                                 }
                             }

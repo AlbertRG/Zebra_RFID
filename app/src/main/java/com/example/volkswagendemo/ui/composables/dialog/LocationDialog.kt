@@ -32,22 +32,21 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.states.LocationState
 import com.example.volkswagendemo.viewmodel.LocationViewModel
 
 @Composable
 fun LocationDialog(
     locationViewModel: LocationViewModel
 ) {
-
     val locationUiState = locationViewModel.locationUiState
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+    when (locationUiState.locationState) {
 
-    when {
-
-        locationUiState.isInternetError -> {
+        LocationState.InternetError -> {
             GeneralDialog(
                 icon = R.drawable.wifi_error,
-                dialogTitle = "Sin conexión",
+                dialogTitle = stringResource(R.string.internet_error_title),
                 dialogText = stringResource(R.string.internet_error),
                 onConfirmation = { locationViewModel.setLocationShowing(false) },
                 hasDismissButton = false,
@@ -55,10 +54,10 @@ fun LocationDialog(
             )
         }
 
-        locationUiState.hasError -> {
+        LocationState.Error -> {
             GeneralDialog(
                 icon = R.drawable.error,
-                dialogTitle = "Error",
+                dialogTitle = stringResource(R.string.error_connecting),
                 dialogText = locationUiState.message,
                 onConfirmation = { locationViewModel.setLocationShowing(false) },
                 hasDismissButton = false,
@@ -94,7 +93,7 @@ fun LocationDialog(
                             tint = colorResource(R.color.primary_red)
                         )
                         Text(
-                            text = "Localizacion",
+                            text = stringResource(R.string.location_title),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
@@ -102,7 +101,7 @@ fun LocationDialog(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
-                        if (!locationUiState.isLoading) {
+                        if (locationUiState.locationState != LocationState.Loading) {
                             LocationInfo(
                                 location = locationUiState.location,
                                 address = locationUiState.address
@@ -116,7 +115,7 @@ fun LocationDialog(
                                     onClick = { locationViewModel.setLocationShowing(false) }
                                 ) {
                                     Text(
-                                        text = "Aceptar",
+                                        text = stringResource(R.string.button_accept),
                                         color = Color.Black
                                     )
                                 }
@@ -134,7 +133,6 @@ fun LocationDialog(
                                     iterations = LottieConstants.IterateForever
                                 )
                             }
-
                         }
                     }
                 }

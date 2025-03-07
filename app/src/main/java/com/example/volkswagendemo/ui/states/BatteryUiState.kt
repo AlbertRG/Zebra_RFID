@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 
 @Stable
 interface BatteryUiState {
+    val batteryState: RfidBatteryState
     val manufactureDate: String
     val modelNumber: String
     val batteryId: String
@@ -15,12 +16,10 @@ interface BatteryUiState {
     val cycleCount: Int
     val percentage: Int
     val temperature: Int
-    val isConnecting: Boolean
-    val isConnected: Boolean
-    val hasError: Boolean
 }
 
 class MutableBatteryUiState() : BatteryUiState {
+    override var batteryState: RfidBatteryState by mutableStateOf(RfidBatteryState.Connecting)
     override var manufactureDate: String by mutableStateOf("")
     override var modelNumber: String by mutableStateOf("")
     override var batteryId: String by mutableStateOf("")
@@ -28,7 +27,10 @@ class MutableBatteryUiState() : BatteryUiState {
     override var cycleCount: Int by mutableIntStateOf(0)
     override var percentage: Int by mutableIntStateOf(0)
     override var temperature: Int by mutableIntStateOf(0)
-    override var isConnecting: Boolean by mutableStateOf(true)
-    override var isConnected: Boolean by mutableStateOf(false)
-    override var hasError: Boolean by mutableStateOf(false)
+}
+
+sealed class RfidBatteryState(val name: String) {
+    data object Connecting : RfidBatteryState("Connecting")
+    data object Ready : RfidBatteryState("Ready")
+    data object Error: RfidBatteryState("Error")
 }

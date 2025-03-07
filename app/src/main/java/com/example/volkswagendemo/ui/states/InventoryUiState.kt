@@ -4,11 +4,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.volkswagendemo.data.RfidData
+import com.example.volkswagendemo.data.models.RfidData
 
 @Stable
 interface InventoryUiState {
-    val rfidState: RfidState
+    val rfidState: RfidInventoryState
+    val workshop: String
     val scannedTags: List<RfidData>
     val filesList: List<String>
     val selectedFileName: String
@@ -19,7 +20,8 @@ interface InventoryUiState {
 }
 
 class MutableInventoryUiState() : InventoryUiState {
-    override var rfidState: RfidState by mutableStateOf(RfidState.Connecting)
+    override var rfidState: RfidInventoryState by mutableStateOf(RfidInventoryState.Connecting)
+    override var workshop: String by mutableStateOf("")
     override var scannedTags: List<RfidData> by mutableStateOf(emptyList())
     override var filesList: List<String> by mutableStateOf(emptyList())
     override var selectedFileName: String by mutableStateOf("")
@@ -29,11 +31,11 @@ class MutableInventoryUiState() : InventoryUiState {
     override var isFileDialogVisible: Boolean by mutableStateOf(false)
 }
 
-sealed class RfidState(val name: String) {
-    data object Connecting : RfidState("Connecting")
-    data object Start : RfidState("Start")
-    data object Reading : RfidState("Reading")
-    data object Pause : RfidState("Pause")
-    data object Stop : RfidState("Stop")
-    data object Error: RfidState("Error")
+sealed class RfidInventoryState(val name: String) {
+    data object Connecting : RfidInventoryState("Connecting")
+    data object Ready : RfidInventoryState("Ready")
+    data object Reading : RfidInventoryState("Reading")
+    data object Pause : RfidInventoryState("Pause")
+    data object Stop : RfidInventoryState("Stop")
+    data object Error: RfidInventoryState("Error")
 }

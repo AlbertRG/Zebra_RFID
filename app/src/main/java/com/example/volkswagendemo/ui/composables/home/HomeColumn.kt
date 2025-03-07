@@ -40,7 +40,7 @@ fun HomeColumn(
             title = "Inventario",
             description = "Genera archivos de REPUVES",
             icon = R.drawable.list,
-            onClick = { homeViewModel.setWorkshopShowing(true) },
+            onClick = { homeViewModel.openWorkshopDialog() },
             iconColor = colorResource(R.color.tertiary_grey),
             fillColor = colorResource(R.color.primary_red)
         )

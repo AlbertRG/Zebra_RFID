@@ -85,6 +85,9 @@ dependencies {
 
     // XLS
     implementation(libs.poi)
+
+    //DataStore
+    implementation(libs.dataStore)
     
     // Legacy Support
     implementation(libs.legacy.support.v4)

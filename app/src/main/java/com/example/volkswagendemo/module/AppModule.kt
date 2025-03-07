@@ -1,8 +1,8 @@
 package com.example.volkswagendemo.module
 
 import android.app.Application
-import com.example.volkswagendemo.utils.ExcelUtils
 import com.example.volkswagendemo.utils.ConversionUtils
+import com.example.volkswagendemo.utils.ExcelUtils
 import com.example.volkswagendemo.utils.LocationUtils
 import dagger.Module
 import dagger.Provides
@@ -23,7 +23,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideExcelUtils(application: Application): ExcelUtils {
-        return ExcelUtils(application)
+        return ExcelUtils(application, ConversionUtils())
     }
 
     @Provides
