@@ -25,8 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,13 +34,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.volkswagendemo.R
+import com.example.volkswagendemo.ui.composables.general.RfidBottomBar
+import com.example.volkswagendemo.ui.states.SettingUiState
+import com.example.volkswagendemo.viewmodel.SettingsViewModel
 
 @Composable
-fun Settings() {
+fun Settings(
+    settingsViewModel: SettingsViewModel
+) {
+    val settingUiState = settingsViewModel.settingUiStates
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,15 +55,32 @@ fun Settings() {
         SettingItem(
             icon = R.drawable.antenna,
             title = "Poder de la Antena"
-        ) { PowerSlider() }
+        ) {
+            PowerSlider(settingUiState) { newPower ->
+                settingsViewModel.updateAntennaPower(newPower)
+            }
+        }
         SettingItem(
             icon = R.drawable.volume_high,
             title = "Volumen"
-        ) { VolumeSelector() }
+        ) {
+            VolumeSelector(settingUiState) { newVolume ->
+                settingsViewModel.updateBeeperVolume(newVolume)
+            }
+        }
         SettingItem(
             icon = R.drawable.settings,
             title = "Link Profile"
         ) { LinkProfileOptions() }
+        RfidBottomBar(
+            isDualMode = false,
+            title = "Guardar",
+            onClickListener = {
+                settingsViewModel.saveSettings()
+            },
+            title2 = "",
+            onClickListener2 = {}
+        )
     }
 }
 
@@ -105,11 +125,10 @@ fun SettingItem(
 }
 
 @Composable
-fun PowerSlider() {
-    var sliderPosition by remember { mutableFloatStateOf(0.5f) }
+fun PowerSlider(settingUiState: SettingUiState, onPowerChange: (Float) -> Unit) {
     Slider(
-        value = sliderPosition,
-        onValueChange = { sliderPosition = it },
+        value = settingUiState.antennaPower / 100f,
+        onValueChange = { power -> onPowerChange(power * 100f) },
         modifier = Modifier
             .padding(vertical = 4.dp),
         colors = SliderDefaults.colors(
@@ -121,8 +140,7 @@ fun PowerSlider() {
 }
 
 @Composable
-fun VolumeSelector() {
-    var selectedIndex by remember { mutableIntStateOf(0) }
+fun VolumeSelector(settingUiState: SettingUiState, onVolumeChange: (Int) -> Unit) {
     val options = listOf("Silencio", "Bajo", "Alto")
     SingleChoiceSegmentedButtonRow(
         modifier = Modifier
@@ -134,8 +152,8 @@ fun VolumeSelector() {
                     index = index,
                     count = options.size
                 ),
-                onClick = { selectedIndex = index },
-                selected = index == selectedIndex,
+                onClick = { onVolumeChange(index) },
+                selected = index == settingUiState.beeperVolume,
                 label = { Text(label) },
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = colorResource(R.color.primary_red),
@@ -198,10 +216,4 @@ fun LinkProfileOptions() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsPreview() {
-    Settings()
 }

@@ -37,4 +37,18 @@ class DataStoreManagerImpl @Inject constructor(
     override fun getWorkshopName(): Flow<String> =
         dataStore.getWorkshopName()
 
+    override suspend fun setAntennaPower(power: Float) {
+        dataStore.setAntennaPower(power)
+    }
+
+    override fun getAntennaPower(): Flow<Float> =
+        dataStore.getAntennaPower()
+
+    override suspend fun setBeeperVolume(volume: Int) {
+        dataStore.setBeeperVolume(volume)
+    }
+
+    override fun getBeeperVolume(): Flow<Int> =
+        dataStore.getBeeperVolume()
+
 }

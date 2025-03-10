@@ -11,17 +11,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.volkswagendemo.R
 import com.example.volkswagendemo.ui.composables.general.Background
+import com.example.volkswagendemo.ui.composables.general.RfidLoading
 import com.example.volkswagendemo.ui.composables.general.RfidTopBar
 import com.example.volkswagendemo.ui.composables.settings.Settings
+import com.example.volkswagendemo.ui.states.SettingState
+import com.example.volkswagendemo.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
+    settingsViewModel: SettingsViewModel,
     navigateToHome: () -> Unit,
 ) {
+    val settingUiState = settingsViewModel.settingUiStates
     Scaffold(
         topBar = {
             RfidTopBar(
@@ -42,13 +46,12 @@ fun SettingsScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Settings()
+                when (settingUiState.settingState) {
+                    SettingState.Loading -> RfidLoading()
+                    SettingState.Ready -> Settings(settingsViewModel)
+                    SettingState.Error -> {}
+                }
             }
         }
     }
-}
-@Preview
-@Composable
-fun SettingsScreenPreview() {
-    SettingsScreen(navigateToHome = {})
 }

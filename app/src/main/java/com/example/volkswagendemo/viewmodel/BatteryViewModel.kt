@@ -90,6 +90,7 @@ class BatteryViewModel @Inject constructor(
             _batteryUiState.cycleCount = batteryStats.cycleCount
             _batteryUiState.percentage = batteryStats.percentage
             _batteryUiState.temperature = batteryStats.temperature
+        }.onSuccess {
             updateBatteryState(rfidBatteryState = RfidBatteryState.Ready)
         }.onFailure { exception ->
             Log.e("RFID_fetchBatteryStats", "⚠️ Error in obtaining battery information")

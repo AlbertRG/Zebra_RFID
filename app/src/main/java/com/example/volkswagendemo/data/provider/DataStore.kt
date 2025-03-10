@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.volkswagendemo.data.models.LocationData
 import com.example.volkswagendemo.utils.PreferencesKeys.ADDRESS
+import com.example.volkswagendemo.utils.PreferencesKeys.ANTENNA_POWER
+import com.example.volkswagendemo.utils.PreferencesKeys.BEEPER_VOLUME
 import com.example.volkswagendemo.utils.PreferencesKeys.IS_LOCATION_SAVED
 import com.example.volkswagendemo.utils.PreferencesKeys.LOCATION
 import com.example.volkswagendemo.utils.PreferencesKeys.WORKSHOP_NAME
@@ -61,6 +63,26 @@ class DataStore @Inject constructor(@ApplicationContext context: Context) {
 
     fun getWorkshopName() = dataStore.data.map {
         it[WORKSHOP_NAME] ?: ""
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun setAntennaPower(power: Float) {
+        dataStore.edit { preferences ->
+            preferences[ANTENNA_POWER] = power
+        }
+    }
+
+    fun getAntennaPower() = dataStore.data.map {
+        it[ANTENNA_POWER] ?: 300F
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun setBeeperVolume(volume: Int) {
+        dataStore.edit { preferences ->
+            preferences[BEEPER_VOLUME] = volume
+        }
+    }
+
+    fun getBeeperVolume() = dataStore.data.map {
+        it[BEEPER_VOLUME] ?: 1
     }.flowOn(Dispatchers.IO)
 
 }

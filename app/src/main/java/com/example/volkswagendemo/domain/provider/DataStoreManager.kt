@@ -17,4 +17,10 @@ interface DataStoreManager {
     suspend fun setWorkshopName(name: String)
     fun getWorkshopName(): Flow<String>
 
+    suspend fun setAntennaPower(power: Float)
+    fun getAntennaPower(): Flow<Float>
+
+    suspend fun setBeeperVolume(volume: Int)
+    fun getBeeperVolume(): Flow<Int>
+
 }

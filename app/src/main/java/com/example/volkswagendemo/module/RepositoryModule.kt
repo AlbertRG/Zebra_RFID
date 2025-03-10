@@ -1,8 +1,10 @@
 package com.example.volkswagendemo.module
 
 import com.example.volkswagendemo.data.repository.LocationRepositoryImpl
+import com.example.volkswagendemo.data.repository.SettingsRepositoryImpl
 import com.example.volkswagendemo.data.repository.WorkshopRepositoryImpl
 import com.example.volkswagendemo.domain.repository.LocationRepository
+import com.example.volkswagendemo.domain.repository.SettingsRepository
 import com.example.volkswagendemo.domain.repository.WorkshopRepository
 import dagger.Binds
 import dagger.Module
@@ -21,4 +23,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWorkshopRepository(workshopRepositoryImpl: WorkshopRepositoryImpl): WorkshopRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(settingsRepositoryImpl: SettingsRepositoryImpl): SettingsRepository
 }

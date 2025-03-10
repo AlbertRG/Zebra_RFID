@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.utils
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
@@ -15,7 +16,7 @@ object PreferencesKeys {
     val WORKSHOP_NAME = stringPreferencesKey("workshop_name")
 
     //SETTINGS
-    val ANTENNA_POWER = intPreferencesKey("300")
-
+    val ANTENNA_POWER = floatPreferencesKey("antenna_power")
+    val BEEPER_VOLUME = intPreferencesKey("beeper_volume")
 
 }

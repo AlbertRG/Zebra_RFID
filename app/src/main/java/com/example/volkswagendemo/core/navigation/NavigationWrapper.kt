@@ -15,6 +15,7 @@ import com.example.volkswagendemo.viewmodel.HomeViewModel
 import com.example.volkswagendemo.viewmodel.InventoryViewModel
 import com.example.volkswagendemo.viewmodel.LocationViewModel
 import com.example.volkswagendemo.viewmodel.SearchViewModel
+import com.example.volkswagendemo.viewmodel.SettingsViewModel
 
 @Composable
 fun NavigationWrapper() {
@@ -64,7 +65,8 @@ fun NavigationWrapper() {
         }
 
         composable<Settings> {
-            SettingsScreen {
+            val settingsViewModel = hiltViewModel<SettingsViewModel>()
+            SettingsScreen(settingsViewModel) {
                 navController.navigate(Home) {
                     popUpTo<Home> { inclusive = true }
                 }
