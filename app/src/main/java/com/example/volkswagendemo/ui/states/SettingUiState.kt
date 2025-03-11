@@ -2,23 +2,20 @@ package com.example.volkswagendemo.ui.states
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.volkswagendemo.data.models.SettingsData
 
 @Stable
 interface SettingUiState {
     val settingState: SettingState
-    val antennaPower: Float
-    val beeperVolume: Int
+    val settings: SettingsData
 }
 
-class MutableSettingUiState() : SettingUiState {
-    override var settingState: SettingState by mutableStateOf(SettingState.Loading)
-    override var antennaPower: Float by mutableFloatStateOf(0f)
-    override var beeperVolume: Int by mutableIntStateOf(0)
-}
+data class MutableSettingUiState(
+    override val settingState: SettingState = SettingState.Loading,
+    override val settings: SettingsData = SettingsData(0f,0)
+) : SettingUiState
 
 sealed class SettingState(val name: String) {
     data object Loading : SettingState("Loading")

@@ -7,6 +7,8 @@ import android.provider.MediaStore
 import android.util.Log
 import com.example.volkswagendemo.data.models.RfidData
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import java.io.File
+import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -16,6 +18,16 @@ class ExcelUtils @Inject constructor(
     private val context: Context,
     private val conversionUtils: ConversionUtils
 ) {
+
+    fun createAppFolder() {
+        val folder = File(context.getExternalFilesDir(null), "RFID")
+        if (!folder.exists()) {
+            val created = folder.mkdirs()
+            Log.d("AppFolder", "📂 Created folder: ${folder.absolutePath} - Success: $created")
+        } else {
+            Log.d("AppFolder", "📂 Folder already exists: ${folder.absolutePath}")
+        }
+    }
 
     fun writeExcelFile(tagsFlow: List<RfidData>, workshop: String) {
         val timestamp = getActualDate()
@@ -95,6 +107,24 @@ class ExcelUtils @Inject constructor(
         return excelFiles.sorted().reversed()
     }
 
+    fun indexExcelFilesApp(): List<String> {
+        val folderPath = File(context.getExternalFilesDir(null), "RFID")
+        val excelFiles = mutableListOf<String>()
+        if (folderPath.exists() && folderPath.isDirectory) {
+            folderPath.listFiles()?.forEach { file ->
+                if (file.extension.equals("xls", ignoreCase = true)) {
+                    Log.d("indexExcelFiles", "📂 File found: ${file.name}")
+                    excelFiles.add(file.name)
+                }
+            }
+        } else {
+            Log.d("indexExcelFiles", "⚠️ Folder does not exist: $folderPath")
+        }
+
+        Log.d("indexExcelFiles", "📂 XLS files found: ${excelFiles.size}")
+        return excelFiles.sorted().reversed()
+    }
+
     fun readSpecificExcelFile(fileName: String, isTagIdNeeded: Boolean = false): List<RfidData> {
         return readExcelFile(fileName, isTagIdNeeded)
     }
@@ -141,6 +171,47 @@ class ExcelUtils @Inject constructor(
                 }
             }
         }
+        return dataList
+    }
+
+    fun readSpecificExcelFileApp(fileName: String, isTagIdNeeded: Boolean = false): List<RfidData> {
+        return readExcelFileApp(fileName, isTagIdNeeded)
+    }
+
+    private fun readExcelFileApp(fileName: String, isTagIdNeeded: Boolean): List<RfidData> {
+        val dataList = mutableListOf<RfidData>()
+        val file = File(context.getExternalFilesDir(null), "RFID/$fileName")
+
+        if (!file.exists()) {
+            Log.e("readExcelFileApp", "⚠️ The file does not exist: ${file.absolutePath}")
+            return emptyList()
+        }
+
+        runCatching {
+            FileInputStream(file).use { inputStream ->
+                HSSFWorkbook(inputStream).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    for (rowIndex in 3 until sheet.physicalNumberOfRows) {
+                        val row = sheet.getRow(rowIndex)
+
+                        val repuve = row?.getCell(0)?.toString()?.trim() ?: ""
+                        val vin = row?.getCell(1)?.toString()?.trim() ?: ""
+
+                        if (vin.isNotEmpty() && repuve.isNotEmpty()) {
+                            var tagID = ""
+                            if (isTagIdNeeded) {
+                                tagID = conversionUtils.asciiToHex(repuve)
+                            }
+                            dataList.add(RfidData(tagID = tagID, repuve = repuve, vin = vin))
+                        }
+                    }
+                }
+            }
+        }.onFailure { e ->
+            Log.e("readExcelFile", "⚠️ Error reading file: ${e.message}")
+        }
+
         return dataList
     }
 

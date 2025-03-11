@@ -16,7 +16,6 @@ object PreferencesKeys {
     val WORKSHOP_NAME = stringPreferencesKey("workshop_name")
 
     //SETTINGS
-    val ANTENNA_POWER = floatPreferencesKey("antenna_power")
-    val BEEPER_VOLUME = intPreferencesKey("beeper_volume")
+    val SETTINGS = stringPreferencesKey("settings")
 
 }

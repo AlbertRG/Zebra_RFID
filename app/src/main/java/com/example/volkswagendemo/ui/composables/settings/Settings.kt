@@ -24,6 +24,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,7 @@ import com.example.volkswagendemo.viewmodel.SettingsViewModel
 fun Settings(
     settingsViewModel: SettingsViewModel
 ) {
-    val settingUiState = settingsViewModel.settingUiStates
+    val settingUiState = settingsViewModel.settingUiStates.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,7 +57,7 @@ fun Settings(
             icon = R.drawable.antenna,
             title = "Poder de la Antena"
         ) {
-            PowerSlider(settingUiState) { newPower ->
+            PowerSlider(settingUiState.value) { newPower ->
                 settingsViewModel.updateAntennaPower(newPower)
             }
         }
@@ -64,7 +65,7 @@ fun Settings(
             icon = R.drawable.volume_high,
             title = "Volumen"
         ) {
-            VolumeSelector(settingUiState) { newVolume ->
+            VolumeSelector(settingUiState.value) { newVolume ->
                 settingsViewModel.updateBeeperVolume(newVolume)
             }
         }
@@ -127,7 +128,7 @@ fun SettingItem(
 @Composable
 fun PowerSlider(settingUiState: SettingUiState, onPowerChange: (Float) -> Unit) {
     Slider(
-        value = settingUiState.antennaPower / 100f,
+        value = settingUiState.settings.antennaPower / 100f,
         onValueChange = { power -> onPowerChange(power * 100f) },
         modifier = Modifier
             .padding(vertical = 4.dp),
@@ -141,7 +142,7 @@ fun PowerSlider(settingUiState: SettingUiState, onPowerChange: (Float) -> Unit) 
 
 @Composable
 fun VolumeSelector(settingUiState: SettingUiState, onVolumeChange: (Int) -> Unit) {
-    val options = listOf("Silencio", "Bajo", "Alto")
+    val options = listOf("Silencio", "Bajo", "Medio", "Alto")
     SingleChoiceSegmentedButtonRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,7 +154,7 @@ fun VolumeSelector(settingUiState: SettingUiState, onVolumeChange: (Int) -> Unit
                     count = options.size
                 ),
                 onClick = { onVolumeChange(index) },
-                selected = index == settingUiState.beeperVolume,
+                selected = index == settingUiState.settings.beeperVolume,
                 label = { Text(label) },
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = colorResource(R.color.primary_red),

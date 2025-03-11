@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.volkswagendemo.data.models.LocationData
+import com.example.volkswagendemo.data.models.SettingsData
 import com.example.volkswagendemo.utils.PreferencesKeys.ADDRESS
-import com.example.volkswagendemo.utils.PreferencesKeys.ANTENNA_POWER
-import com.example.volkswagendemo.utils.PreferencesKeys.BEEPER_VOLUME
 import com.example.volkswagendemo.utils.PreferencesKeys.IS_LOCATION_SAVED
 import com.example.volkswagendemo.utils.PreferencesKeys.LOCATION
+import com.example.volkswagendemo.utils.PreferencesKeys.SETTINGS
 import com.example.volkswagendemo.utils.PreferencesKeys.WORKSHOP_NAME
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -65,24 +65,20 @@ class DataStore @Inject constructor(@ApplicationContext context: Context) {
         it[WORKSHOP_NAME] ?: ""
     }.flowOn(Dispatchers.IO)
 
-    suspend fun setAntennaPower(power: Float) {
+    suspend fun setSettings(settings: SettingsData) {
         dataStore.edit { preferences ->
-            preferences[ANTENNA_POWER] = power
+            preferences[SETTINGS] = Json.encodeToString(settings)
         }
     }
 
-    fun getAntennaPower() = dataStore.data.map {
-        it[ANTENNA_POWER] ?: 300F
-    }.flowOn(Dispatchers.IO)
-
-    suspend fun setBeeperVolume(volume: Int) {
-        dataStore.edit { preferences ->
-            preferences[BEEPER_VOLUME] = volume
-        }
-    }
-
-    fun getBeeperVolume() = dataStore.data.map {
-        it[BEEPER_VOLUME] ?: 1
+    fun getSettings() = dataStore.data.map { preferences ->
+        preferences[SETTINGS]?.let {
+            runCatching {
+                Json.decodeFromString<SettingsData>(it)
+            }.getOrElse {
+                SettingsData(antennaPower = 0f, beeperVolume = 0)
+            }
+        } ?: SettingsData(antennaPower = 0f, beeperVolume = 0)
     }.flowOn(Dispatchers.IO)
 
 }

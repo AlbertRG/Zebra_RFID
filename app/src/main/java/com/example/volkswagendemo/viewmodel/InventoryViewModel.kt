@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.models.RfidData
+import com.example.volkswagendemo.domain.usecase.settings.GetSettingsUseCase
 import com.example.volkswagendemo.domain.usecase.workshop.GetWorkshopUseCase
 import com.example.volkswagendemo.ui.states.InventoryUiState
 import com.example.volkswagendemo.ui.states.MutableInventoryUiState
@@ -32,15 +33,17 @@ import com.zebra.rfid.api3.TriggerInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
     application: Application,
+    private val getWorkshopUseCase: GetWorkshopUseCase,
+    private val getSettingsUseCase: GetSettingsUseCase,
     private val conversionUtils: ConversionUtils,
-    private val excelUtils: ExcelUtils,
-    private val getWorkshopUseCase: GetWorkshopUseCase
+    private val excelUtils: ExcelUtils
 ) : ViewModel() {
 
     private val _inventoryUiState = MutableInventoryUiState()
@@ -53,14 +56,36 @@ class InventoryViewModel @Inject constructor(
     private val _scannedTagsList = mutableListOf<RfidData>()
 
     init {
-        getDataStoreInfo()
-        connectReader()
+        getWorkshop()
+        getRfidSettings()
     }
 
-    private fun getDataStoreInfo(){
+    private fun getWorkshop() {
         viewModelScope.launch {
-            getWorkshopUseCase().collect{
-                _inventoryUiState.workshop = it
+            runCatching {
+                getWorkshopUseCase().first()
+            }.onSuccess { workshop ->
+                workshop.let {
+                    _inventoryUiState.workshop = workshop
+                }
+            }.onFailure {
+                handleError("RFID_getWorkshop", it)
+            }
+        }
+    }
+
+    private fun getRfidSettings() {
+        viewModelScope.launch {
+            runCatching {
+                getSettingsUseCase().first()
+            }.onSuccess { settings ->
+                settings?.let {
+                    _inventoryUiState.settings.antennaPower = settings.antennaPower
+                    _inventoryUiState.settings.beeperVolume = settings.beeperVolume
+                }
+                connectReader()
+            }.onFailure { exception ->
+                handleError("RFID_getRfidSettings", exception)
             }
         }
     }
@@ -108,7 +133,7 @@ class InventoryViewModel @Inject constructor(
             configureTrigger(rfidReader)
             configureEvents(rfidReader)
         }.onSuccess {
-            updateInventoryState(rfidState = RfidInventoryState.Ready)
+            updateInventoryState(RfidInventoryState.Ready)
             Log.i("RFID_configureReader", "✅ RFID reader configured and ready!")
         }.onFailure { exception ->
             handleError("RFID_configureReader", exception)
@@ -117,9 +142,9 @@ class InventoryViewModel @Inject constructor(
 
     private fun configureAntenna(rfidReader: RFIDReader) {
         val antennaConfig = rfidReader.Config.Antennas.getAntennaRfConfig(1)
-        antennaConfig.transmitPowerIndex = 300
-        antennaConfig.setrfModeTableIndex(0)
-        antennaConfig.tari = 0
+        antennaConfig.transmitPowerIndex = _inventoryUiState.settings.antennaPower.toInt()
+        //antennaConfig.setrfModeTableIndex(0)
+        //antennaConfig.tari = 0
         rfidReader.Config.Antennas.setAntennaRfConfig(1, antennaConfig)
     }
 
@@ -134,7 +159,12 @@ class InventoryViewModel @Inject constructor(
             setLedBlinkEnable(true)
             startTrigger = triggerInfo.StartTrigger
             stopTrigger = triggerInfo.StopTrigger
-            beeperVolume = BEEPER_VOLUME.LOW_BEEP
+            beeperVolume = when (_inventoryUiState.settings.beeperVolume) {
+                0 -> BEEPER_VOLUME.QUIET_BEEP
+                1 -> BEEPER_VOLUME.LOW_BEEP
+                2 -> BEEPER_VOLUME.MEDIUM_BEEP
+                else -> BEEPER_VOLUME.HIGH_BEEP
+            }
         }
     }
 
@@ -181,7 +211,7 @@ class InventoryViewModel @Inject constructor(
                 offset = 4
             }
         }
-        updateInventoryState(rfidState = RfidInventoryState.Reading)
+        updateInventoryState(RfidInventoryState.Reading)
         rfidReader?.Actions?.TagAccess?.readEvent(readAccessParams, null, null)
     }
 
@@ -196,7 +226,7 @@ class InventoryViewModel @Inject constructor(
     }
 
     private fun pauseInventoryRead() {
-        updateInventoryState(rfidState = RfidInventoryState.Pause)
+        updateInventoryState(RfidInventoryState.Pause)
         rfidReader?.Actions?.TagAccess?.stopAccess()
     }
 
@@ -213,7 +243,7 @@ class InventoryViewModel @Inject constructor(
     private fun stopInventorySession() {
         excelUtils.writeExcelFile(_inventoryUiState.scannedTags, _inventoryUiState.workshop)
         _inventoryUiState.filesList = excelUtils.indexExcelFiles(_inventoryUiState.workshop)
-        updateInventoryState(rfidState = RfidInventoryState.Stop)
+        updateInventoryState(RfidInventoryState.Stop)
     }
 
     fun openFileDialog(file: String) {
@@ -240,11 +270,11 @@ class InventoryViewModel @Inject constructor(
         _scannedTagsList.clear()
         _inventoryUiState.scannedTags = emptyList()
         _inventoryUiState.filesList = emptyList()
-        updateInventoryState(rfidState = RfidInventoryState.Ready)
+        updateInventoryState(RfidInventoryState.Ready)
     }
 
     fun retryReaderConnection() {
-        updateInventoryState(rfidState = RfidInventoryState.Connecting)
+        updateInventoryState(RfidInventoryState.Connecting)
         connectReader()
     }
 
@@ -262,7 +292,7 @@ class InventoryViewModel @Inject constructor(
             is OperationFailureException -> "⚠️ OperationFailure: ${exception.vendorMessage}"
             else -> "⚠️ Unexpected error: ${exception.message}"
         }
-        updateInventoryState(rfidState = RfidInventoryState.Error)
+        updateInventoryState(RfidInventoryState.Error)
         Log.e(title, message)
     }
 

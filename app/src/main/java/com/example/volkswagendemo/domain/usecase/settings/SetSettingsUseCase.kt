@@ -1,14 +1,15 @@
 package com.example.volkswagendemo.domain.usecase.settings
 
+import com.example.volkswagendemo.data.models.SettingsData
 import com.example.volkswagendemo.domain.repository.SettingsRepository
 import javax.inject.Inject
 
-class SetAntennaPowerUseCase @Inject constructor(
+class SetSettingsUseCase @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) {
 
-    suspend operator fun invoke(power: Float) {
-        settingsRepository.setAntennaPower(power)
+    suspend operator fun invoke(settings: SettingsData) {
+        settingsRepository.setSettings(settings)
     }
 
 }

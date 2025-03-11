@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.data.provider
 
 import com.example.volkswagendemo.data.models.LocationData
+import com.example.volkswagendemo.data.models.SettingsData
 import com.example.volkswagendemo.domain.provider.DataStoreManager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -37,18 +38,11 @@ class DataStoreManagerImpl @Inject constructor(
     override fun getWorkshopName(): Flow<String> =
         dataStore.getWorkshopName()
 
-    override suspend fun setAntennaPower(power: Float) {
-        dataStore.setAntennaPower(power)
+    override suspend fun setSettings(settings: SettingsData) {
+        dataStore.setSettings(settings)
     }
 
-    override fun getAntennaPower(): Flow<Float> =
-        dataStore.getAntennaPower()
-
-    override suspend fun setBeeperVolume(volume: Int) {
-        dataStore.setBeeperVolume(volume)
-    }
-
-    override fun getBeeperVolume(): Flow<Int> =
-        dataStore.getBeeperVolume()
+    override fun getSettings(): Flow<SettingsData?> =
+        dataStore.getSettings()
 
 }

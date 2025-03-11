@@ -54,7 +54,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun getFilesList() {
-        _searchUiState.filesList = excelUtils.indexExcelFiles("Demo")
+        _searchUiState.filesList = excelUtils.indexExcelFilesApp()
     }
 
     fun selectFile(file: String) {
@@ -74,7 +74,7 @@ class SearchViewModel @Inject constructor(
 
     private fun getSelectedFileData() {
         updateSearchState(rfidSearchState = RfidSearchState.Setup)
-        _searchUiState.fileData = excelUtils.readSpecificExcelFile(_searchUiState.selectedFileName, true)
+        _searchUiState.fileData = excelUtils.readSpecificExcelFileApp(_searchUiState.selectedFileName, true)
     }
 
     private fun connectReader() {

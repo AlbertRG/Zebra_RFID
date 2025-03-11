@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.domain.provider
 
 import com.example.volkswagendemo.data.models.LocationData
+import com.example.volkswagendemo.data.models.SettingsData
 import kotlinx.coroutines.flow.Flow
 
 interface DataStoreManager {
@@ -17,10 +18,7 @@ interface DataStoreManager {
     suspend fun setWorkshopName(name: String)
     fun getWorkshopName(): Flow<String>
 
-    suspend fun setAntennaPower(power: Float)
-    fun getAntennaPower(): Flow<Float>
-
-    suspend fun setBeeperVolume(volume: Int)
-    fun getBeeperVolume(): Flow<Int>
+    suspend fun setSettings(settings: SettingsData)
+    fun getSettings(): Flow<SettingsData?>
 
 }

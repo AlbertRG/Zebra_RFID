@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,7 +26,7 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     navigateToHome: () -> Unit,
 ) {
-    val settingUiState = settingsViewModel.settingUiStates
+    val settingUiState = settingsViewModel.settingUiStates.collectAsState()
     Scaffold(
         topBar = {
             RfidTopBar(
@@ -46,7 +47,7 @@ fun SettingsScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                when (settingUiState.settingState) {
+                when (settingUiState.value.settingState) {
                     SettingState.Loading -> RfidLoading()
                     SettingState.Ready -> Settings(settingsViewModel)
                     SettingState.Error -> {}

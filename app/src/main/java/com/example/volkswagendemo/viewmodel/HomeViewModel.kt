@@ -9,6 +9,7 @@ import com.example.volkswagendemo.domain.usecase.location.GetLocationUseCase
 import com.example.volkswagendemo.domain.usecase.workshop.SetWorkshopUseCase
 import com.example.volkswagendemo.ui.states.HomeUiState
 import com.example.volkswagendemo.ui.states.MutableHomeUiState
+import com.example.volkswagendemo.utils.ExcelUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -21,8 +22,13 @@ class HomeViewModel @Inject constructor(
     private val getLocationSavedUseCase: GetLocationSavedUseCase,
     private val getLocationUseCase: GetLocationUseCase,
     private val getAddressUseCase: GetAddressUseCase,
-    private val setWorkshopUseCase: SetWorkshopUseCase
+    private val setWorkshopUseCase: SetWorkshopUseCase,
+    private val excelUtils: ExcelUtils
 ) : ViewModel() {
+
+    init {
+        excelUtils.createAppFolder()
+    }
 
     private val _homeUiState = MutableHomeUiState()
     val homeUiStates: HomeUiState = _homeUiState

@@ -3,41 +3,43 @@ package com.example.volkswagendemo.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.volkswagendemo.domain.usecase.settings.GetAntennaPowerUseCase
-import com.example.volkswagendemo.domain.usecase.settings.GetBeeperVolumeUseCase
-import com.example.volkswagendemo.domain.usecase.settings.SetAntennaPowerUseCase
-import com.example.volkswagendemo.domain.usecase.settings.SetBeeperVolumeUseCase
+import com.example.volkswagendemo.data.models.SettingsData
+import com.example.volkswagendemo.domain.usecase.settings.GetSettingsUseCase
+import com.example.volkswagendemo.domain.usecase.settings.SetSettingsUseCase
 import com.example.volkswagendemo.ui.states.MutableSettingUiState
 import com.example.volkswagendemo.ui.states.SettingState
 import com.example.volkswagendemo.ui.states.SettingUiState
 import com.zebra.rfid.api3.InvalidUsageException
 import com.zebra.rfid.api3.OperationFailureException
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val getAntennaPowerUseCase: GetAntennaPowerUseCase,
-    private val setAntennaPowerUseCase: SetAntennaPowerUseCase,
-    private val getBeeperVolumeUseCase: GetBeeperVolumeUseCase,
-    private val setBeeperVolumeUseCase: SetBeeperVolumeUseCase,
+    private val getSettingsUseCase: GetSettingsUseCase,
+    private val setSettingsUseCase: SetSettingsUseCase
 ) : ViewModel() {
 
-    private val _settingUiState = MutableSettingUiState()
-    val settingUiStates: SettingUiState = _settingUiState
+    private val _settingUiState = MutableStateFlow(MutableSettingUiState())
+    val settingUiStates: StateFlow<SettingUiState> = _settingUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             runCatching {
-                val antennaPowerDeferred =  async { getAntennaPowerUseCase().first() }
-                val beeperVolumeDeferred = async { getBeeperVolumeUseCase().first() }
-                _settingUiState.antennaPower = antennaPowerDeferred.await()
-                _settingUiState.beeperVolume = beeperVolumeDeferred.await()
-            }.onSuccess {
-                updateSettingsState(settingState = SettingState.Ready)
+                getSettingsUseCase().first()
+            }.onSuccess { settings ->
+                settings?.let {
+                    _settingUiState.update { currentState: MutableSettingUiState ->
+                        currentState.copy(settings = settings)
+                    }
+                }
+                updateSettingsState(SettingState.Ready)
             }.onFailure { exception ->
                 handleError("RFID_fetchSettings", exception)
             }
@@ -46,28 +48,31 @@ class SettingsViewModel @Inject constructor(
 
     fun updateAntennaPower(newPower: Float) {
         viewModelScope.launch {
-            _settingUiState.antennaPower = newPower
+            _settingUiState.update { currentState: MutableSettingUiState ->
+                currentState.copy(settings = currentState.settings.copy(antennaPower = newPower))
+            }
         }
     }
 
     fun updateBeeperVolume(newVolume: Int) {
         viewModelScope.launch {
-            _settingUiState.beeperVolume = newVolume
+            _settingUiState.update { currentState: MutableSettingUiState ->
+                currentState.copy(settings = currentState.settings.copy(beeperVolume = newVolume))
+            }
         }
     }
 
     fun saveSettings() {
         viewModelScope.launch {
-            val currentState = _settingUiState
-            Log.d(
-                "RFID_saveSettings",
-                "📌 Guardando valores: AntennaPower=${currentState.antennaPower}, BeeperVolume=${currentState.beeperVolume}"
-            )
             runCatching {
-                setAntennaPowerUseCase(power = currentState.antennaPower)
-                setBeeperVolumeUseCase(volume = currentState.beeperVolume)
+                setSettingsUseCase(
+                    SettingsData(
+                        antennaPower = _settingUiState.value.settings.antennaPower,
+                        beeperVolume = _settingUiState.value.settings.beeperVolume
+                    )
+                )
             }.onSuccess {
-                Log.d("RFID_saveSettings", "✅ Configuración guardada exitosamente")
+                Log.d("RFID_saveSettings", "✅ Configuration saved successfully")
             }.onFailure { exception ->
                 handleError("RFID_saveSettings", exception)
             }
@@ -76,7 +81,9 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateSettingsState(settingState: SettingState) {
         viewModelScope.launch {
-            _settingUiState.settingState = settingState
+            _settingUiState.update { currentState: MutableSettingUiState ->
+                currentState.copy(settingState = settingState)
+            }
             Log.d("RFID_updateSettingsState", "🔵 Status: ${settingState.name}")
         }
     }
