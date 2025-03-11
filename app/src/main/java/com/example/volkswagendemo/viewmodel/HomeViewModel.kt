@@ -23,7 +23,7 @@ class HomeViewModel @Inject constructor(
     private val getLocationUseCase: GetLocationUseCase,
     private val getAddressUseCase: GetAddressUseCase,
     private val setWorkshopUseCase: SetWorkshopUseCase,
-    private val excelUtils: ExcelUtils
+    excelUtils: ExcelUtils
 ) : ViewModel() {
 
     init {

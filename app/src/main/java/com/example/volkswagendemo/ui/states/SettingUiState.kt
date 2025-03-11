@@ -1,9 +1,6 @@
 package com.example.volkswagendemo.ui.states
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.example.volkswagendemo.data.models.SettingsData
 
 @Stable
@@ -14,7 +11,7 @@ interface SettingUiState {
 
 data class MutableSettingUiState(
     override val settingState: SettingState = SettingState.Loading,
-    override val settings: SettingsData = SettingsData(0f,0)
+    override val settings: SettingsData = SettingsData(0f, 0)
 ) : SettingUiState
 
 sealed class SettingState(val name: String) {
