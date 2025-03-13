@@ -1,6 +1,7 @@
 package com.example.volkswagendemo.ui.composables.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,16 +52,17 @@ fun Settings(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        SettingItem(
+        /*SettingItem(
             icon = R.drawable.antenna,
             title = "Poder de la Antena"
         ) {
             PowerSlider(settingUiState.value) { newPower ->
                 settingsViewModel.updateAntennaPower(newPower)
             }
-        }
+        }*/
         SettingItem(
             icon = R.drawable.volume_high,
             title = "Volumen"
@@ -69,10 +71,10 @@ fun Settings(
                 settingsViewModel.updateBeeperVolume(newVolume)
             }
         }
-        SettingItem(
+        /*SettingItem(
             icon = R.drawable.settings,
             title = "Link Profile"
-        ) { LinkProfileOptions() }
+        ) { LinkProfileOptions() }*/
         RfidBottomBar(
             isDualMode = false,
             title = "Guardar",

@@ -41,6 +41,7 @@ sealed class RfidInventoryState(val name: String) {
     data object Ready : RfidInventoryState("Ready")
     data object Reading : RfidInventoryState("Reading")
     data object Pause : RfidInventoryState("Pause")
+    data object Report : RfidInventoryState("Report")
     data object Stop : RfidInventoryState("Stop")
     data object Error: RfidInventoryState("Error")
 }

@@ -1,7 +1,19 @@
 package com.example.volkswagendemo.viewmodel
 
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.volkswagendemo.data.models.RfidData
@@ -12,6 +24,7 @@ import com.example.volkswagendemo.ui.states.MutableInventoryUiState
 import com.example.volkswagendemo.ui.states.RfidInventoryState
 import com.example.volkswagendemo.utils.ConversionUtils
 import com.example.volkswagendemo.utils.ExcelUtils
+import com.google.common.util.concurrent.ListenableFuture
 import com.zebra.rfid.api3.BEEPER_VOLUME
 import com.zebra.rfid.api3.ENUM_TRANSPORT
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE
@@ -35,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +60,8 @@ class InventoryViewModel @Inject constructor(
     private val excelUtils: ExcelUtils
 ) : ViewModel() {
 
+    private val context = application.applicationContext
+
     private val _inventoryUiState = MutableInventoryUiState()
     val inventoryUiState: InventoryUiState = _inventoryUiState
 
@@ -54,6 +70,12 @@ class InventoryViewModel @Inject constructor(
     private var rfidReader: RFIDReader? = null
     private val eventHandler = EventHandler()
     private val _scannedTagsList = mutableListOf<RfidData>()
+
+    private val _imageCapture = MutableLiveData<ImageCapture?>()
+    val imageCapture: LiveData<ImageCapture?> = _imageCapture
+
+    private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider> =
+        ProcessCameraProvider.getInstance(application)
 
     init {
         getWorkshop()
@@ -228,6 +250,67 @@ class InventoryViewModel @Inject constructor(
     private fun pauseInventoryRead() {
         updateInventoryState(RfidInventoryState.Pause)
         rfidReader?.Actions?.TagAccess?.stopAccess()
+    }
+
+    fun reportInventory() {
+        if (_inventoryUiState.rfidState == RfidInventoryState.Pause) {
+            runCatching {
+                updateInventoryState(RfidInventoryState.Report)
+            }.onFailure { exception ->
+                handleError("RFID_reportInventory", exception)
+            }
+        }
+    }
+
+    fun hasCamaraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun initCamera(previewView: PreviewView, lifecycleOwner: LifecycleOwner) {
+        val executor = ContextCompat.getMainExecutor(context)
+
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+
+            val preview = Preview.Builder().build().also {
+                it.surfaceProvider = previewView.surfaceProvider
+            }
+
+            val imageCapture = ImageCapture.Builder().build()
+            _imageCapture.value = imageCapture
+
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build()
+
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
+            } catch (e: Exception) {
+                Log.e("CameraViewModel", "Error al inicializar la cámara", e)
+            }
+        }, executor)
+    }
+
+    fun capturePhoto() {
+        val imageCapture = _imageCapture.value ?: return
+        val photoFile = File(context.externalCacheDir, "photo.jpg")
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(context),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    Log.d("CameraViewModel", "Foto guardada en: ${photoFile.absolutePath}")
+                }
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e("CameraViewModel", "Error al tomar foto", exception)
+                }
+            }
+        )
     }
 
     fun stopInventory() {
